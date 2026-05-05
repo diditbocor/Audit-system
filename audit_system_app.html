@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans, system-ui, sans-serif); font-size: 14px; color: var(--color-text-primary); background: transparent; }
+
+.app { display: flex; flex-direction: column; min-height: 600px; }
+.topbar { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.logo-icon { width: 28px; height: 28px; background: #1D9E75; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.logo-icon svg { width: 16px; height: 16px; fill: white; }
+.drive-status { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+.dot.connected { background: #1D9E75; }
+
+.tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.tab { padding: 10px 20px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab.active { color: var(--color-text-primary); border-bottom-color: #1D9E75; font-weight: 500; background: var(--color-background-primary); }
+.tab:hover:not(.active) { color: var(--color-text-primary); background: var(--color-background-primary); }
+
+.content { flex: 1; padding: 20px; background: var(--color-background-tertiary, #f9f9f7); }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg, 12px); padding: 16px 20px; margin-bottom: 12px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  padding: 7px 10px; border: 0.5px solid var(--color-border-secondary, rgba(0,0,0,0.2));
+  border-radius: var(--border-radius-md, 8px); font-size: 13px; background: var(--color-background-primary);
+  color: var(--color-text-primary); width: 100%; outline: none; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { border-color: #1D9E75; box-shadow: 0 0 0 2px rgba(29,158,117,0.15); }
+textarea { resize: vertical; min-height: 60px; }
+
+.checklist-section { margin-bottom: 12px; }
+.checklist-header { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.checklist-item:last-child { border-bottom: none; }
+.item-desc { flex: 1; font-size: 13px; line-height: 1.5; }
+.item-controls { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.yn-btn { padding: 3px 10px; font-size: 11px; border: 0.5px solid var(--color-border-secondary, rgba(0,0,0,0.2)); border-radius: 4px; cursor: pointer; background: transparent; color: var(--color-text-secondary); font-family: inherit; transition: all 0.1s; }
+.yn-btn.yes.active { background: #EAF3DE; border-color: #639922; color: #3B6D11; font-weight: 500; }
+.yn-btn.no.active { background: #FCEBEB; border-color: #A32D2D; color: #791F1F; font-weight: 500; }
+.yn-btn.na.active { background: var(--color-background-secondary); border-color: var(--color-border-primary, rgba(0,0,0,0.35)); color: var(--color-text-primary); font-weight: 500; }
+
+.score-row { display: flex; align-items: center; gap: 8px; }
+.score-dot { width: 24px; height: 24px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); background: transparent; transition: all 0.1s; }
+.score-dot.active-1 { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
+.score-dot.active-2 { background: #FAEEDA; border-color: #BA7517; color: #854F0B; }
+.score-dot.active-3 { background: #E6F1FB; border-color: #378ADD; color: #185FA5; }
+.score-dot.active-4 { background: #EAF3DE; border-color: #639922; color: #3B6D11; }
+.score-dot.active-5 { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+
+.file-drop { border: 1px dashed var(--color-border-secondary, rgba(0,0,0,0.2)); border-radius: var(--border-radius-md); padding: 16px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.file-drop:hover { border-color: #1D9E75; background: rgba(29,158,117,0.04); }
+.file-drop-text { font-size: 12px; color: var(--color-text-secondary); }
+.file-list { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.file-tag { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--color-text-primary); }
+.file-tag button { background: none; border: none; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); padding: 0; line-height: 1; }
+
+.btn { padding: 8px 16px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; border: 0.5px solid; }
+.btn-primary { background: #1D9E75; border-color: #1D9E75; color: white; }
+.btn-primary:hover { background: #0F6E56; }
+.btn-secondary { background: transparent; border-color: var(--color-border-secondary, rgba(0,0,0,0.2)); color: var(--color-text-primary); }
+.btn-secondary:hover { background: var(--color-background-secondary); }
+.btn-danger { background: transparent; border-color: #E24B4A; color: #A32D2D; font-size: 12px; padding: 5px 10px; }
+.btn-danger:hover { background: #FCEBEB; }
+
+.btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+.audit-grid { display: grid; gap: 10px; }
+.audit-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; cursor: pointer; transition: all 0.15s; }
+.audit-card:hover { border-color: #1D9E75; }
+.audit-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.audit-card-title { font-size: 14px; font-weight: 500; }
+.audit-card-meta { font-size: 12px; color: var(--color-text-secondary); display: flex; gap: 12px; }
+.badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.badge-draft { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+.badge-done { background: #E1F5EE; color: #085041; }
+.badge-review { background: #FAEEDA; color: #633806; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.stat-num { font-size: 22px; font-weight: 500; line-height: 1.2; }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.drive-panel { text-align: center; padding: 32px 20px; }
+.drive-icon { width: 48px; height: 48px; margin: 0 auto 12px; }
+.drive-panel h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.drive-panel p { font-size: 13px; color: var(--color-text-secondary); max-width: 320px; margin: 0 auto 16px; line-height: 1.6; }
+.input-drive { display: flex; gap: 8px; max-width: 400px; margin: 0 auto; }
+.folder-path { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono, monospace); margin: 8px auto; max-width: 400px; text-align: left; word-break: break-all; }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--color-text-secondary); }
+.empty-icon { font-size: 32px; margin-bottom: 8px; }
+.empty-state p { font-size: 13px; }
+
+.progress-bar { height: 4px; background: var(--color-background-secondary); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: #1D9E75; border-radius: 2px; transition: width 0.3s; }
+
+.toast { position: fixed; bottom: 16px; right: 16px; background: #1D9E75; color: white; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all 0.2s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: #E24B4A; }
+
+.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+    </div>
+    Audit System
+  </div>
+  <div class="drive-status" id="driveStatusBtn" onclick="switchPage('settings')">
+    <div class="dot" id="driveDot"></div>
+    <span id="driveStatusText">Belum terhubung ke Drive</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchPage('dashboard')">Dashboard</div>
+  <div class="tab" onclick="switchPage('new')">+ Audit Baru</div>
+  <div class="tab" onclick="switchPage('list')">Riwayat</div>
+  <div class="tab" onclick="switchPage('settings')">Drive Setup</div>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total audit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-done" style="color:#1D9E75">0</div>
+      <div class="stat-label">Selesai</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-draft" style="color:#BA7517">0</div>
+      <div class="stat-label">Draft</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-score">-</div>
+      <div class="stat-label">Skor rata-rata</div>
+    </div>
+  </div>
+
+  <div class="section-title">Audit terbaru</div>
+  <div id="recent-list">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Belum ada audit. Klik "Audit Baru" untuk mulai.</p>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT BARU -->
+<div class="page" id="page-new">
+  <div class="card">
+    <div class="section-title">Informasi umum</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nama auditee / entitas</label>
+        <input type="text" id="f-entity" placeholder="PT Contoh Mining">
+      </div>
+      <div class="form-group">
+        <label>Lokasi / site</label>
+        <input type="text" id="f-location" placeholder="Site Kalimantan Timur">
+      </div>
+    </div>
+    <div class="form-row three">
+      <div class="form-group">
+        <label>Tanggal audit</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>Jenis audit</label>
+        <select id="f-type">
+          <option>Fleet Management</option>
+          <option>Production Verification</option>
+          <option>PA/UA Metrics</option>
+          <option>Safety & Compliance</option>
+          <option>Fuel Management</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Auditor</label>
+        <input type="text" id="f-auditor" placeholder="Nama auditor">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Periode audit</label>
+        <input type="text" id="f-period" placeholder="Contoh: Januari 2025 - Maret 2025">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Checklist pemeriksaan</div>
+    <div id="checklist-container"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Temuan & rekomendasi</div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Temuan utama</label>
+        <textarea id="f-findings" placeholder="Deskripsikan temuan-temuan signifikan yang ditemukan selama audit..." rows="4"></textarea>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Rekomendasi</label>
+        <textarea id="f-recommendations" placeholder="Tuliskan rekomendasi perbaikan..." rows="3"></textarea>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Catatan tambahan</label>
+        <textarea id="f-notes" placeholder="Catatan lain jika ada..." rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Upload dokumen pendukung</div>
+    <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()">
+      <div class="file-drop-text">Klik untuk upload, atau drag & drop di sini</div>
+      <div class="file-drop-text" style="font-size:11px; margin-top:4px">PDF, Excel, Word, gambar (max 10MB)</div>
+    </div>
+    <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles(this.files)">
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="saveDraft()">Simpan draft</button>
+    <button class="btn btn-primary" onclick="submitAudit()">Simpan & selesaikan</button>
+  </div>
+</div>
+
+<!-- RIWAYAT -->
+<div class="page" id="page-list">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <div class="section-title" style="margin:0">Semua audit</div>
+    <div style="display:flex; gap:8px;">
+      <select id="filter-type" onchange="renderList()" style="font-size:12px; padding:5px 8px; width:auto;">
+        <option value="">Semua jenis</option>
+        <option>Fleet Management</option>
+        <option>Production Verification</option>
+        <option>PA/UA Metrics</option>
+        <option>Safety & Compliance</option>
+        <option>Fuel Management</option>
+        <option>Lainnya</option>
+      </select>
+      <select id="filter-status" onchange="renderList()" style="font-size:12px; padding:5px 8px; width:auto;">
+        <option value="">Semua status</option>
+        <option value="done">Selesai</option>
+        <option value="draft">Draft</option>
+      </select>
+    </div>
+  </div>
+  <div id="audit-list"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="card drive-panel">
+    <img class="drive-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/512px-Google_Drive_icon_%282020%29.svg.png" onerror="this.style.display='none'">
+    <h3>Google Drive Setup</h3>
+    <p>Data audit disimpan ke Google Drive lo. Bisa diakses dari laptop manapun selama login ke akun Google yang sama.</p>
+
+    <div id="drive-not-connected">
+      <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 16px; max-width:400px; margin:0 auto 16px; text-align:left; font-size:12px; line-height:1.7; color:var(--color-text-secondary);">
+        <strong style="color:var(--color-text-primary); display:block; margin-bottom:4px;">Cara setup:</strong>
+        1. Klik "Hubungkan ke Drive" di bawah<br>
+        2. Pilih / buat folder "AuditSystem" di Drive lo<br>
+        3. Salin Folder ID dari URL browser<br>
+        4. Paste di kolom di bawah &amp; klik Simpan
+      </div>
+      <div class="input-drive">
+        <input type="text" id="driveFolder" placeholder="Folder ID dari Google Drive..." style="flex:1">
+        <button class="btn btn-primary" onclick="saveDriveSettings()">Simpan</button>
+      </div>
+      <div style="margin-top:10px;">
+        <a href="https://drive.google.com" style="font-size:12px; color:#1D9E75; text-decoration:none;" onclick="openLink('https://drive.google.com'); return false;">Buka Google Drive →</a>
+      </div>
+    </div>
+
+    <div id="drive-connected" style="display:none">
+      <div class="folder-path" id="connected-folder"></div>
+      <p style="color:#1D9E75; font-size:13px; font-weight:500;">Drive terhubung</p>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:12px;">
+        <button class="btn btn-secondary" onclick="syncFromDrive()">Sync dari Drive</button>
+        <button class="btn btn-danger" onclick="disconnectDrive()">Putuskan koneksi</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">Pengaturan template</div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label>Nama perusahaan (untuk header laporan)</label>
+      <input type="text" id="set-company" placeholder="PT Nama Perusahaan">
+    </div>
+    <div class="form-group">
+      <label>Logo URL (opsional)</label>
+      <input type="text" id="set-logo" placeholder="https://...">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAppSettings()">Simpan pengaturan</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CHECKLISTS = {
+  "Fleet Management": [
+    {id:"fm1", text:"Data FMS (Fleet Management System) tersedia dan dapat diverifikasi"},
+    {id:"fm2", text:"Laporan PA (Physical Availability) sesuai dengan data aktual unit"},
+    {id:"fm3", text:"Laporan UA (Use of Availability) konsisten dengan jam operasi"},
+    {id:"fm4", text:"Klasifikasi waktu (W/S/B) dicatat dengan benar di setiap shift"},
+    {id:"fm5", text:"Ritasi dan cycle time terdokumentasi dan wajar"},
+    {id:"fm6", text:"Laporan DER (Daily Equipment Report) lengkap dan akurat"},
+    {id:"fm7", text:"Hourly Monitoring tersedia dan konsisten dengan summary harian"},
+    {id:"fm8", text:"Matching Factor alat gali-angkut dihitung dengan benar"},
+    {id:"fm9", text:"Data reconciliation antara FMS dan survey independen dilakukan"},
+    {id:"fm10", text:"Opportunity loss terdokumentasi dengan kategori yang jelas"},
+  ],
+  "Production Verification": [
+    {id:"pv1", text:"Volume produksi (Bcm) dapat diverifikasi dari survey independen"},
+    {id:"pv2", text:"Laporan produksi harian konsisten dengan rekap bulanan"},
+    {id:"pv3", text:"Data ritasi aktual sesuai dengan volume yang dilaporkan"},
+    {id:"pv4", text:"Faktor density/konversi yang digunakan terdokumentasi"},
+    {id:"pv5", text:"Rekonsiliasi produksi vs target dilakukan dan dijelaskan"},
+  ],
+  "PA/UA Metrics": [
+    {id:"pu1", text:"Formula PA = (Total waktu - Breakdown) / Total waktu digunakan"},
+    {id:"pu2", text:"Formula UA = Jam operasi / (Total waktu - Planned maintenance) digunakan"},
+    {id:"pu3", text:"Kategori downtime (breakdown, PM, standby) konsisten"},
+    {id:"pu4", text:"Target PA/UA perusahaan terdefinisi dan terdokumentasi"},
+    {id:"pu5", text:"Tren PA/UA bulanan dianalisis dan dijelaskan"},
+    {id:"pu6", text:"Waterfall analysis tersedia untuk deviasi PA/UA signifikan"},
+  ],
+  "Safety & Compliance": [
+    {id:"sc1", text:"Laporan insiden dan near-miss terdokumentasi lengkap"},
+    {id:"sc2", text:"Sertifikasi operator unit alat berat up to date"},
+    {id:"sc3", text:"Prosedur pre-start inspection dilaksanakan dan dicatat"},
+    {id:"sc4", text:"SOP pengoperasian unit tersedia di lokasi"},
+    {id:"sc5", text:"Inspeksi berkala unit terjadwal dan terlaksana"},
+  ],
+  "Fuel Management": [
+    {id:"fu1", text:"Pencatatan konsumsi bahan bakar per unit tersedia"},
+    {id:"fu2", text:"Fuel ratio (liter/Bcm atau liter/jam) dalam batas wajar"},
+    {id:"fu3", text:"Stok fuel direkonsiliasi dengan konsumsi aktual"},
+    {id:"fu4", text:"Sistem dispenser fuel berfungsi dan terkalibrasi"},
+    {id:"fu5", text:"Laporan abnormal fuel consumption ditindaklanjuti"},
+  ],
+  "Lainnya": [
+    {id:"ot1", text:"Dokumen-dokumen utama tersedia dan dapat diakses"},
+    {id:"ot2", text:"Sistem pencatatan memadai dan konsisten"},
+    {id:"ot3", text:"Temuan audit sebelumnya telah ditindaklanjuti"},
+    {id:"ot4", text:"Personel kunci dapat diwawancara dan responsif"},
+    {id:"ot5", text:"Data pendukung audit memadai dan dapat diverifikasi"},
+  ]
+};
+
+let state = {
+  audits: JSON.parse(localStorage.getItem('audits') || '[]'),
+  driveFolder: localStorage.getItem('driveFolder') || '',
+  company: localStorage.getItem('auditCompany') || '',
+  checklistAnswers: {},
+  checklistScores: {},
+  checklistNotes: {},
+  attachedFiles: [],
+  editingId: null,
+  currentType: 'Fleet Management'
+};
+
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').value = today;
+  document.getElementById('set-company').value = state.company;
+  updateDriveStatus();
+  updateStats();
+  renderChecklist('Fleet Management');
+  document.getElementById('f-type').addEventListener('change', function() {
+    renderChecklist(this.value);
+  });
+}
+
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const tabs = ['dashboard','new','list','settings'];
+  const idx = tabs.indexOf(page);
+  if(idx >= 0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(page === 'list') renderList();
+  if(page === 'dashboard') { updateStats(); renderRecent(); }
+  if(page === 'settings') updateDriveUI();
+}
+
+function renderChecklist(type) {
+  state.currentType = type;
+  state.checklistAnswers = {};
+  state.checklistScores = {};
+  state.checklistNotes = {};
+  const items = CHECKLISTS[type] || CHECKLISTS['Lainnya'];
+  const container = document.getElementById('checklist-container');
+  container.innerHTML = '';
+
+  const section = document.createElement('div');
+  section.className = 'checklist-section';
+  section.innerHTML = `<div class="checklist-header">${type} — ${items.length} poin pemeriksaan</div>`;
+
+  items.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'checklist-item';
+    row.innerHTML = `
+      <div class="item-desc">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;">${i+1}.</div>
+        ${item.text}
+        <div style="margin-top:6px;">
+          <input type="text" placeholder="Catatan (opsional)..." id="note-${item.id}" style="font-size:11px;padding:4px 8px;" oninput="state.checklistNotes['${item.id}']=this.value">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        <div class="item-controls">
+          <button class="yn-btn yes" id="yes-${item.id}" onclick="setYN('${item.id}','yes')">Ya</button>
+          <button class="yn-btn no" id="no-${item.id}" onclick="setYN('${item.id}','no')">Tidak</button>
+          <button class="yn-btn na" id="na-${item.id}" onclick="setYN('${item.id}','na')">N/A</button>
+        </div>
+        <div class="score-row">
+          ${[1,2,3,4,5].map(n=>`<div class="score-dot" id="score-${item.id}-${n}" onclick="setScore('${item.id}',${n})" title="Skor ${n}">${n}</div>`).join('')}
+        </div>
+      </div>`;
+    section.appendChild(row);
+  });
+
+  container.appendChild(section);
+}
+
+function setYN(id, val) {
+  state.checklistAnswers[id] = val;
+  ['yes','no','na'].forEach(v => {
+    const btn = document.getElementById(v+'-'+id);
+    btn.classList.remove('active');
+  });
+  document.getElementById(val+'-'+id).classList.add('active');
+}
+
+function setScore(id, val) {
+  state.checklistScores[id] = val;
+  for(let i=1;i<=5;i++) {
+    const el = document.getElementById('score-'+id+'-'+i);
+    el.className = 'score-dot';
+    if(i <= val) el.classList.add('active-'+val);
+  }
+}
+
+function calcScore() {
+  const scores = Object.values(state.checklistScores);
+  if(!scores.length) return null;
+  return Math.round((scores.reduce((a,b)=>a+b,0) / scores.length) * 10) / 10;
+}
+
+function getCheckedCount() {
+  return Object.keys(state.checklistAnswers).length;
+}
+
+function handleFiles(files) {
+  Array.from(files).forEach(f => {
+    if(f.size > 10*1024*1024) { showToast('File '+f.name+' terlalu besar (max 10MB)', true); return; }
+    state.attachedFiles.push({name:f.name, size:f.size, type:f.type});
+  });
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = state.attachedFiles.map((f,i)=>`
+    <div class="file-tag">
+      <span>${f.name}</span>
+      <button onclick="removeFile(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeFile(i) {
+  state.attachedFiles.splice(i,1);
+  renderFileList();
+}
+
+function buildAuditData(status) {
+  return {
+    id: state.editingId || Date.now().toString(),
+    status,
+    entity: document.getElementById('f-entity').value,
+    location: document.getElementById('f-location').value,
+    date: document.getElementById('f-date').value,
+    type: document.getElementById('f-type').value,
+    auditor: document.getElementById('f-auditor').value,
+    period: document.getElementById('f-period').value,
+    findings: document.getElementById('f-findings').value,
+    recommendations: document.getElementById('f-recommendations').value,
+    notes: document.getElementById('f-notes').value,
+    answers: {...state.checklistAnswers},
+    scores: {...state.checklistScores},
+    noteItems: {...state.checklistNotes},
+    files: [...state.attachedFiles],
+    avgScore: calcScore(),
+    checkedCount: getCheckedCount(),
+    totalItems: (CHECKLISTS[document.getElementById('f-type').value]||CHECKLISTS['Lainnya']).length,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function saveDraft() {
+  const data = buildAuditData('draft');
+  if(!data.entity) { showToast('Isi nama auditee dulu', true); return; }
+  saveAudit(data);
+  showToast('Draft tersimpan');
+}
+
+function submitAudit() {
+  const data = buildAuditData('done');
+  if(!data.entity) { showToast('Isi nama auditee dulu', true); return; }
+  if(!data.auditor) { showToast('Isi nama auditor dulu', true); return; }
+  saveAudit(data);
+  showToast('Audit berhasil disimpan!');
+  resetForm();
+  setTimeout(()=>switchPage('dashboard'), 1200);
+}
+
+function saveAudit(data) {
+  const idx = state.audits.findIndex(a=>a.id===data.id);
+  if(idx >= 0) state.audits[idx] = data;
+  else state.audits.unshift(data);
+  localStorage.setItem('audits', JSON.stringify(state.audits));
+  if(state.driveFolder) saveToDrive(data);
+}
+
+function saveToDrive(data) {
+  console.log('Saving to Drive folder:', state.driveFolder, data);
+}
+
+function resetForm() {
+  ['f-entity','f-location','f-auditor','f-period','f-findings','f-recommendations','f-notes'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f-type').value = 'Fleet Management';
+  state.attachedFiles = [];
+  state.editingId = null;
+  renderFileList();
+  renderChecklist('Fleet Management');
+}
+
+function renderList() {
+  const typeFilter = document.getElementById('filter-type').value;
+  const statusFilter = document.getElementById('filter-status').value;
+  let audits = state.audits.filter(a => {
+    if(typeFilter && a.type !== typeFilter) return false;
+    if(statusFilter && a.status !== statusFilter) return false;
+    return true;
+  });
+  const container = document.getElementById('audit-list');
+  if(!audits.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>Tidak ada audit yang sesuai filter.</p></div>';
+    return;
+  }
+  container.innerHTML = audits.map(a=>`
+    <div class="audit-card" onclick="openAudit('${a.id}')">
+      <div class="audit-card-header">
+        <div class="audit-card-title">${a.entity||'-'}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${a.avgScore ? `<span style="font-size:12px;color:var(--color-text-secondary);">Skor: <strong>${a.avgScore}</strong>/5</span>` : ''}
+          <span class="badge ${a.status==='done'?'badge-done':'badge-draft'}">${a.status==='done'?'Selesai':'Draft'}</span>
+        </div>
+      </div>
+      <div class="audit-card-meta">
+        <span>${a.type}</span>
+        <span>${a.location||'-'}</span>
+        <span>${a.date||'-'}</span>
+        <span>${a.auditor||'-'}</span>
+      </div>
+      <div class="progress-bar" style="margin-top:8px;">
+        <div class="progress-fill" style="width:${Math.round((a.checkedCount||0)/(a.totalItems||1)*100)}%"></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px;">${a.checkedCount||0}/${a.totalItems||0} poin diperiksa</div>
+    </div>`).join('');
+}
+
+function openAudit(id) {
+  showToast('Fitur buka audit lengkap — segera hadir');
+}
+
+function renderRecent() {
+  const recent = state.audits.slice(0,3);
+  const container = document.getElementById('recent-list');
+  if(!recent.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Belum ada audit. Klik "Audit Baru" untuk mulai.</p></div>';
+    return;
+  }
+  container.innerHTML = recent.map(a=>`
+    <div class="audit-card" style="margin-bottom:8px;" onclick="switchPage('list')">
+      <div class="audit-card-header">
+        <div class="audit-card-title">${a.entity||'-'}</div>
+        <span class="badge ${a.status==='done'?'badge-done':'badge-draft'}">${a.status==='done'?'Selesai':'Draft'}</span>
+      </div>
+      <div class="audit-card-meta">
+        <span>${a.type}</span><span>${a.date||'-'}</span><span>${a.auditor||'-'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats() {
+  const total = state.audits.length;
+  const done = state.audits.filter(a=>a.status==='done').length;
+  const draft = state.audits.filter(a=>a.status==='draft').length;
+  const scores = state.audits.filter(a=>a.avgScore).map(a=>a.avgScore);
+  const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '-';
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-draft').textContent = draft;
+  document.getElementById('stat-score').textContent = avg;
+}
+
+function updateDriveStatus() {
+  const connected = !!state.driveFolder;
+  document.getElementById('driveDot').className = 'dot' + (connected?' connected':'');
+  document.getElementById('driveStatusText').textContent = connected ? 'Drive terhubung' : 'Belum terhubung ke Drive';
+}
+
+function updateDriveUI() {
+  const connected = !!state.driveFolder;
+  document.getElementById('drive-not-connected').style.display = connected ? 'none' : 'block';
+  document.getElementById('drive-connected').style.display = connected ? 'block' : 'none';
+  if(connected) document.getElementById('connected-folder').textContent = 'Folder ID: ' + state.driveFolder;
+  document.getElementById('set-company').value = state.company;
+}
+
+function saveDriveSettings() {
+  const folder = document.getElementById('driveFolder').value.trim();
+  if(!folder) { showToast('Masukkan Folder ID dulu', true); return; }
+  state.driveFolder = folder;
+  localStorage.setItem('driveFolder', folder);
+  updateDriveStatus();
+  updateDriveUI();
+  showToast('Drive berhasil dihubungkan!');
+}
+
+function disconnectDrive() {
+  state.driveFolder = '';
+  localStorage.removeItem('driveFolder');
+  updateDriveStatus();
+  updateDriveUI();
+  showToast('Koneksi Drive diputus');
+}
+
+function syncFromDrive() {
+  showToast('Sync dari Drive — fitur segera hadir');
+}
+
+function saveAppSettings() {
+  state.company = document.getElementById('set-company').value;
+  localStorage.setItem('auditCompany', state.company);
+  showToast('Pengaturan disimpan');
+}
+
+function showToast(msg, error=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error?' error':'') + ' show';
+  setTimeout(()=>t.className='toast', 2500);
+}
+
+const fileDrop = document.getElementById('fileDrop');
+fileDrop.addEventListener('dragover', e=>{e.preventDefault();fileDrop.style.borderColor='#1D9E75';});
+fileDrop.addEventListener('dragleave', ()=>fileDrop.style.borderColor='');
+fileDrop.addEventListener('drop', e=>{
+  e.preventDefault();
+  fileDrop.style.borderColor='';
+  handleFiles(e.dataTransfer.files);
+});
+
+init();
+renderRecent();
+</script>
+</body>
+</html>
