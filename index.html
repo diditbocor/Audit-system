@@ -125,19 +125,25 @@
       gap:12px;
       margin-top:8px;
     }
+    .login label{
+      display:block;
+      font-size:13px;
+      font-weight:700;
+      color:var(--gray-600);
+      margin:0 0 6px;
+    }
     .field-row{
       position:relative;
-      display:flex;
-      align-items:center;
       width:100%;
     }
     .field-row input{
       width:100%;
       border:1px solid var(--gray-300);
       border-radius:14px;
-      padding:12px 44px 12px 14px;
+      padding:12px 46px 12px 14px;
       font-size:15px;
       outline:none;
+      background:#fff;
     }
     .eye-btn{
       position:absolute;
@@ -154,8 +160,29 @@
       align-items:center;
       justify-content:center;
     }
-    .eye-btn svg{width:18px;height:18px}
-    .login input, .login select, .login button, .login textarea{
+    .eye-btn svg{width:18px;height:18px;transition:all .15s ease}
+    .eye-btn:hover{color:var(--navy)}
+    .eye-btn.active{color:var(--accent)}
+    .tooltip{
+      position:absolute;
+      top:-34px;
+      right:0;
+      background:var(--navy);
+      color:#fff;
+      font-size:12px;
+      padding:5px 8px;
+      border-radius:8px;
+      white-space:nowrap;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(4px);
+      transition:all .15s ease;
+    }
+    .field-row:hover .tooltip{
+      opacity:1;
+      transform:translateY(0);
+    }
+    .login button{
       width:100%;
       border:1px solid var(--gray-300);
       border-radius:14px;
@@ -163,16 +190,19 @@
       font-size:15px;
       outline:none;
     }
-    .login button{
+    .login button.primary{
       background:var(--navy);
       color:#fff;
       font-weight:700;
       cursor:pointer;
+      border:0;
     }
     .login button.secondary{
       background:#fff;
       color:var(--navy);
       border:1px solid var(--navy);
+      cursor:pointer;
+      font-weight:700;
     }
     .status{
       margin-top:12px;
@@ -220,6 +250,18 @@
       background:#fff7eb;
       border:1px solid #f0ad4e;
     }
+    .main-wrap{
+      display:none;
+    }
+    .main-wrap.active{
+      display:block;
+    }
+    .auth-wrap.active{
+      display:block;
+    }
+    .auth-wrap{
+      display:none;
+    }
     @media (max-width: 1024px){
       .cards,.grid,.menu-grid{grid-template-columns:1fr 1fr}
     }
@@ -232,6 +274,7 @@
 </head>
 <body>
   <div class="wrap">
+
     <div class="topbar">
       <div class="brand">
         <div class="brand-badge">DB</div>
@@ -247,121 +290,155 @@
     </div>
 
     <div class="container">
-      <div class="hero">
-        <h1>Platform audit terintegrasi untuk holding mining</h1>
-        <p>
-          Sistem ini dibuat untuk mendukung audit harian, monitoring EWS, laporan, dan modul operasional.
-          Untuk tahap awal, halaman ini menampilkan struktur dasar dulu supaya repo lo balik aman dan siap dikembangkan bertahap.
-        </p>
-      </div>
 
-      <div class="cards">
-        <div class="card">
-          <div class="label">Total Audit Aktif</div>
-          <div class="value" id="metricAudit">0</div>
-        </div>
-        <div class="card">
-          <div class="label">PA/UA Rata-rata</div>
-          <div class="value" id="metricPaua">0%</div>
-        </div>
-        <div class="card">
-          <div class="label">Temuan Terbuka</div>
-          <div class="value" id="metricTemuan">0</div>
-        </div>
-        <div class="card">
-          <div class="label">Data EWS Periode Aktif</div>
-          <div class="value" id="metricEws">0</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="panel" id="dashboardPanel">
-          <h2>Dashboard</h2>
-          <p class="subtext">
-            Area ini nanti dipakai buat ringkasan data perusahaan, switch IUP/IUJP, dan akses cepat ke modul audit.
-            Untuk sekarang masih versi dasar supaya file utama bisa jalan normal dulu.
-          </p>
-
-          <div class="menu-grid">
-            <div class="menu-item">
-              <h3>IUP</h3>
-              <div>Data perusahaan IUP terpisah di database Supabase.</div>
-              <span class="tag">Ready to extend</span>
-            </div>
-            <div class="menu-item">
-              <h3>IUJP</h3>
-              <div>Data perusahaan IUJP juga dipisah total.</div>
-              <span class="tag">Ready to extend</span>
-            </div>
-            <div class="menu-item">
-              <h3>HRM</h3>
-              <div>Nanti diisi modul Coal Getting, Hauling, Road Maintenance, dan lainnya.</div>
-              <span class="tag">Next build</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="authPanel">
-          <h2>Login Supabase</h2>
-          <p class="subtext">Masukkan email dan password untuk masuk ke sistem.</p>
-
-          <div class="login">
-            <input id="email" type="email" placeholder="Email" />
-            <div class="field-row">
-              <input id="password" type="password" placeholder="Password" />
-              <button class="eye-btn" type="button" onclick="togglePassword('password','eyeMain')" id="eyeMain" aria-label="Toggle password">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-            <button onclick="signIn()">Login</button>
-            <button class="secondary" onclick="signOut()">Logout</button>
-          </div>
-
-          <div class="status" id="authStatus">Status: belum login</div>
-
-          <div class="panel hidden reset-box" id="resetPanel">
-            <h2>Reset Password</h2>
-            <p class="subtext">Masukkan password baru dua kali, lalu simpan.</p>
+      <div class="auth-wrap active" id="authWrap">
+        <div class="grid" style="grid-template-columns:1fr;max-width:520px;margin:0 auto;">
+          <div class="panel" id="authPanel">
+            <h2>Login Supabase</h2>
+            <p class="subtext">Masukkan email dan password untuk masuk ke sistem.</p>
 
             <div class="login">
-              <div class="field-row">
-                <input id="newPassword" type="password" placeholder="Password baru" />
-                <button class="eye-btn" type="button" onclick="togglePassword('newPassword','eyeNew1')" id="eyeNew1" aria-label="Toggle new password">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </button>
+              <div>
+                <label>Email</label>
+                <input id="email" type="email" placeholder="Email" />
               </div>
-              <div class="field-row">
-                <input id="confirmPassword" type="password" placeholder="Ulangi password baru" />
-                <button class="eye-btn" type="button" onclick="togglePassword('confirmPassword','eyeNew2')" id="eyeNew2" aria-label="Toggle confirm password">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </button>
+
+              <div>
+                <label>Password</label>
+                <div class="field-row">
+                  <input id="password" type="password" placeholder="Password" />
+                  <span class="tooltip">show password</span>
+                  <button class="eye-btn" type="button" onclick="togglePassword('password','eyeMain')" id="eyeMain" aria-label="Toggle password">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <button onclick="saveNewPassword()">Simpan Password Baru</button>
+
+              <button class="primary" onclick="signIn()">Login</button>
+              <button class="secondary" onclick="signOut()">Logout</button>
             </div>
 
-            <div class="status" id="resetStatus">Status: menunggu password baru</div>
+            <div class="status" id="authStatus">Status: belum login</div>
+
+            <div class="panel hidden reset-box" id="resetPanel">
+              <h2>Reset Password</h2>
+              <p class="subtext">Masukkan password baru dua kali, lalu simpan.</p>
+
+              <div class="login">
+                <div>
+                  <label>Password Baru</label>
+                  <div class="field-row">
+                    <input id="newPassword" type="password" placeholder="Password baru" />
+                    <span class="tooltip">show password</span>
+                    <button class="eye-btn" type="button" onclick="togglePassword('newPassword','eyeNew1')" id="eyeNew1" aria-label="Toggle new password">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Ulangi Password Baru</label>
+                  <div class="field-row">
+                    <input id="confirmPassword" type="password" placeholder="Ulangi password baru" />
+                    <span class="tooltip">show password</span>
+                    <button class="eye-btn" type="button" onclick="togglePassword('confirmPassword','eyeNew2')" id="eyeNew2" aria-label="Toggle confirm password">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <button class="primary" onclick="saveNewPassword()">Simpan Password Baru</button>
+              </div>
+
+              <div class="status" id="resetStatus">Status: menunggu password baru</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="panel" style="margin-top:18px;">
-        <h2>Menu Utama</h2>
-        <p class="subtext">
-          Setelah struktur ini aman, kita lanjut isi satu modul per sesi: EWS, HRM, Rekonsiliasi Tonnase, PICA, Tren, lalu Kimi Analysis.
-        </p>
-      </div>
+      <div class="main-wrap" id="mainWrap">
+        <div class="hero">
+          <h1>Platform audit terintegrasi untuk holding mining</h1>
+          <p>
+            Sistem ini dibuat untuk mendukung audit harian, monitoring EWS, laporan, dan modul operasional.
+            Untuk tahap awal, halaman ini menampilkan struktur dasar dulu supaya repo lo balik aman dan siap dikembangkan bertahap.
+          </p>
+        </div>
 
-      <div class="footer">
-        dibup Audit System • Navy #132257 • Supabase Auth + Storage + PostgreSQL
+        <div class="cards">
+          <div class="card">
+            <div class="label">Total Audit Aktif</div>
+            <div class="value" id="metricAudit">0</div>
+          </div>
+          <div class="card">
+            <div class="label">PA/UA Rata-rata</div>
+            <div class="value" id="metricPaua">0%</div>
+          </div>
+          <div class="card">
+            <div class="label">Temuan Terbuka</div>
+            <div class="value" id="metricTemuan">0</div>
+          </div>
+          <div class="card">
+            <div class="label">Data EWS Periode Aktif</div>
+            <div class="value" id="metricEws">0</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel" id="dashboardPanel">
+            <h2>Dashboard</h2>
+            <p class="subtext">
+              Area ini nanti dipakai buat ringkasan data perusahaan, switch IUP/IUJP, dan akses cepat ke modul audit.
+              Untuk sekarang masih versi dasar supaya file utama bisa jalan normal dulu.
+            </p>
+
+            <div class="menu-grid">
+              <div class="menu-item">
+                <h3>IUP</h3>
+                <div>Data perusahaan IUP terpisah di database Supabase.</div>
+                <span class="tag">Ready to extend</span>
+              </div>
+              <div class="menu-item">
+                <h3>IUJP</h3>
+                <div>Data perusahaan IUJP juga dipisah total.</div>
+                <span class="tag">Ready to extend</span>
+              </div>
+              <div class="menu-item">
+                <h3>HRM</h3>
+                <div>Nanti diisi modul Coal Getting, Hauling, Road Maintenance, dan lainnya.</div>
+                <span class="tag">Next build</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Akun</h2>
+            <p class="subtext">
+              Login dulu. Setelah sukses, dashboard akan muncul otomatis.
+            </p>
+            <div class="status">Status: menunggu login berhasil</div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:18px;">
+          <h2>Menu Utama</h2>
+          <p class="subtext">
+            Setelah struktur ini aman, kita lanjut isi satu modul per sesi: EWS, HRM, Rekonsiliasi Tonnase, PICA, Tren, lalu Kimi Analysis.
+          </p>
+        </div>
+
+        <div class="footer">
+          dibup Audit System • Navy #132257 • Supabase Auth + Storage + PostgreSQL
+        </div>
       </div>
     </div>
   </div>
@@ -373,14 +450,38 @@
 
     function goSection(name){
       const status = document.getElementById('authStatus');
-      status.textContent = 'Menu dipilih: ' + name;
+      if(status) status.textContent = 'Menu dipilih: ' + name;
     }
 
     function togglePassword(inputId, btnId){
       const input = document.getElementById(inputId);
-      if(!input) return;
+      const btn = document.getElementById(btnId);
+      if(!input || !btn) return;
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
+      btn.classList.toggle('active', !isHidden);
+    }
+
+    function showMain(){
+      document.getElementById('authWrap').classList.remove('active');
+      document.getElementById('mainWrap').classList.add('active');
+    }
+
+    function showAuth(){
+      document.getElementById('mainWrap').classList.remove('active');
+      document.getElementById('authWrap').classList.add('active');
+    }
+
+    function isRecoveryMode(){
+      return location.search.includes('mode=recovery') || location.hash.includes('type=recovery');
+    }
+
+    async function handleRecoveryMode(){
+      showAuth();
+      const panel = document.getElementById('resetPanel');
+      if(panel) panel.classList.remove('hidden');
+      const authStatus = document.getElementById('authStatus');
+      if(authStatus) authStatus.textContent = 'Status: mode reset password aktif';
     }
 
     async function signIn(){
@@ -400,6 +501,7 @@
       }
 
       document.getElementById('authStatus').textContent = 'Login berhasil: ' + (data.user?.email || email);
+      showMain();
     }
 
     async function signOut(){
@@ -409,17 +511,7 @@
         return;
       }
       document.getElementById('authStatus').textContent = 'Status: sudah logout';
-    }
-
-    function isRecoveryMode(){
-      return location.search.includes('mode=recovery') || location.hash.includes('type=recovery');
-    }
-
-    async function handleRecoveryMode(){
-      const panel = document.getElementById('resetPanel');
-      if(panel) panel.classList.remove('hidden');
-      const authStatus = document.getElementById('authStatus');
-      if(authStatus) authStatus.textContent = 'Status: mode reset password aktif';
+      showAuth();
     }
 
     async function saveNewPassword(){
@@ -435,7 +527,7 @@
         return;
       }
 
-      const { data, error } = await supabase.auth.updateUser({ password: pass1 });
+      const { error } = await supabase.auth.updateUser({ password: pass1 });
 
       if(error){
         document.getElementById('resetStatus').textContent = 'Gagal simpan password: ' + error.message;
@@ -443,14 +535,22 @@
       }
 
       document.getElementById('resetStatus').textContent = 'Password berhasil diganti. Silakan login ulang.';
-      const panel = document.getElementById('resetPanel');
-      if(panel) panel.classList.add('hidden');
+      document.getElementById('resetPanel').classList.add('hidden');
       document.getElementById('authStatus').textContent = 'Status: password baru tersimpan';
     }
 
     if (isRecoveryMode()) {
       window.addEventListener('load', handleRecoveryMode);
     }
+
+    window.addEventListener('load', async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if(session){
+        showMain();
+        const authStatus = document.getElementById('authStatus');
+        if(authStatus) authStatus.textContent = 'Login aktif: ' + (session.user?.email || 'user');
+      }
+    });
   </script>
 </body>
 </html>
