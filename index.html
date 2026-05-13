@@ -126,23 +126,35 @@
       margin-top:8px;
     }
     .field-row{
+      position:relative;
       display:flex;
-      gap:10px;
       align-items:center;
+      width:100%;
     }
     .field-row input{
-      flex:1;
-    }
-    .toggle-btn{
-      min-width:92px;
+      width:100%;
       border:1px solid var(--gray-300);
-      background:#fff;
-      color:var(--navy);
-      padding:12px 12px;
       border-radius:14px;
-      cursor:pointer;
-      font-weight:700;
+      padding:12px 44px 12px 14px;
+      font-size:15px;
+      outline:none;
     }
+    .eye-btn{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      border:0;
+      background:transparent;
+      color:var(--gray-600);
+      cursor:pointer;
+      padding:4px;
+      line-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .eye-btn svg{width:18px;height:18px}
     .login input, .login select, .login button, .login textarea{
       width:100%;
       border:1px solid var(--gray-300);
@@ -208,7 +220,6 @@
       background:#fff7eb;
       border:1px solid #f0ad4e;
     }
-    .small-note{font-size:12px;color:var(--gray-600);margin-top:4px}
     @media (max-width: 1024px){
       .cards,.grid,.menu-grid{grid-template-columns:1fr 1fr}
     }
@@ -216,8 +227,6 @@
       .topbar{flex-direction:column;align-items:flex-start}
       .cards,.grid,.menu-grid{grid-template-columns:1fr}
       .hero h1{font-size:28px}
-      .field-row{flex-direction:column;align-items:stretch}
-      .toggle-btn{width:100%}
     }
   </style>
 </head>
@@ -300,8 +309,11 @@
             <input id="email" type="email" placeholder="Email" />
             <div class="field-row">
               <input id="password" type="password" placeholder="Password" />
-              <button class="toggle-btn" type="button" onclick="togglePassword('password','toggleMain')">
-                Show
+              <button class="eye-btn" type="button" onclick="togglePassword('password','eyeMain')" id="eyeMain" aria-label="Toggle password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
               </button>
             </div>
             <button onclick="signIn()">Login</button>
@@ -317,14 +329,20 @@
             <div class="login">
               <div class="field-row">
                 <input id="newPassword" type="password" placeholder="Password baru" />
-                <button class="toggle-btn" type="button" onclick="togglePassword('newPassword','toggleNew1')">
-                  Show
+                <button class="eye-btn" type="button" onclick="togglePassword('newPassword','eyeNew1')" id="eyeNew1" aria-label="Toggle new password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
                 </button>
               </div>
               <div class="field-row">
                 <input id="confirmPassword" type="password" placeholder="Ulangi password baru" />
-                <button class="toggle-btn" type="button" onclick="togglePassword('confirmPassword','toggleNew2')">
-                  Show
+                <button class="eye-btn" type="button" onclick="togglePassword('confirmPassword','eyeNew2')" id="eyeNew2" aria-label="Toggle confirm password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
                 </button>
               </div>
               <button onclick="saveNewPassword()">Simpan Password Baru</button>
@@ -360,11 +378,9 @@
 
     function togglePassword(inputId, btnId){
       const input = document.getElementById(inputId);
-      const btn = document.getElementById(btnId);
-      if(!input || !btn) return;
+      if(!input) return;
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
-      btn.textContent = isHidden ? 'Hide' : 'Show';
     }
 
     async function signIn(){
