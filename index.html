@@ -270,25 +270,86 @@
       .cards,.grid,.menu-grid{grid-template-columns:1fr}
       .hero h1{font-size:28px}
     }
+    <style>
+  body { ... }
+  .topbar { ... }
+
+  .nav{display:none}
+  .nav.active{display:flex}
+  .menu-dot{position:relative;display:none}
+  .menu-dot.active{display:block}
+  .brand-only{font-size:22px;font-weight:800;letter-spacing:.2px}
+  .field-row{position:relative;width:100%}
+  .field-row input{
+    width:100%;
+    border:1px solid var(--gray-300);
+    border-radius:14px;
+    padding:12px 46px 12px 14px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+  }
+  .eye-btn{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    border:0;
+    background:transparent;
+    color:var(--gray-600);
+    cursor:pointer;
+    padding:4px;
+    line-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .eye-btn svg{width:18px;height:18px;transition:all .15s ease}
+  .eye-btn.active{color:var(--accent)}
+  .tooltip{
+    position:absolute;
+    top:-34px;
+    right:0;
+    background:var(--navy);
+    color:#fff;
+    font-size:12px;
+    padding:5px 8px;
+    border-radius:8px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(4px);
+    transition:all .15s ease;
+  }
+  .field-row:hover .tooltip{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .auth-wrap{display:block}
+  .auth-wrap.hidden{display:none}
+  .main-wrap{display:none}
+  .main-wrap.active{display:block}
+</style>
   </style>
 </head>
 <body>
   <div class="wrap">
 
-    <div class="topbar">
-      <div class="brand">
-        <div class="brand-badge">DB</div>
-        <div>dibup Audit System</div>
-      </div>
-      <div class="nav">
-        <button class="active" onclick="goSection('dashboard')">Dashboard</button>
-        <button onclick="goSection('ews')">EWS</button>
-        <button onclick="goSection('audit')">Audit</button>
-        <button onclick="goSection('compliance')">Compliance</button>
-        <button onclick="goSection('report')">Report</button>
-      </div>
-    </div>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-badge">DB</div>
+    <div class="brand-only">dibup Audit System</div>
+  </div>
 
+  <div class="nav" id="mainNav"></div>
+
+  <div class="menu-dot" id="menuDot">
+    <button class="dot-btn" onclick="toggleDotMenu()">⋮</button>
+    <div class="dot-menu" id="dotMenu">
+      <button onclick="signOut()">Logout</button>
+    </div>
+  </div>
+</div>
     <div class="container">
 
       <div class="auth-wrap active" id="authWrap">
@@ -321,27 +382,33 @@
               <button class="secondary" onclick="signOut()">Logout</button>
             </div>
 
-            <div class="status" id="authStatus">Status: belum login</div>
-
+           
             <div class="panel hidden reset-box" id="resetPanel">
               <h2>Reset Password</h2>
               <p class="subtext">Masukkan password baru dua kali, lalu simpan.</p>
 
-              <div class="login">
-                <div>
-                  <label>Password Baru</label>
-                  <div class="field-row">
-                    <input id="newPassword" type="password" placeholder="Password baru" />
-                    <span class="tooltip">show password</span>
-                    <button class="eye-btn" type="button" onclick="togglePassword('newPassword','eyeNew1')" id="eyeNew1" aria-label="Toggle new password">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+<div class="login">
+  <div>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="Email" />
+  </div>
 
+  <div>
+    <label>Password</label>
+    <div class="field-row">
+      <input id="password" type="password" placeholder="Password" />
+      <span class="tooltip">show password</span>
+      <button class="eye-btn" type="button" onclick="togglePassword('password','eyeMain')" id="eyeMain" aria-label="Toggle password">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button class="primary" onclick="signIn()">Login</button>
+</div>
                 <div>
                   <label>Ulangi Password Baru</label>
                   <div class="field-row">
