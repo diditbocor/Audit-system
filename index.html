@@ -8,37 +8,25 @@
   <style>
     :root {
       --navy: #132257;
-      --navy-dark: #0c1a42;
       --navy-light: #1e3272;
       --accent: #4f8ef7;
-      --accent-light: #dce8ff;
-      --teal: #1D9E75;
-      --teal-light: #E1F5EE;
-      --white: #ffffff;
       --gray-50: #f8f9fb;
-      --gray-100: #f0f2f7;
       --gray-200: #e2e6ef;
       --gray-300: #c9d1e2;
       --gray-400: #9aa3b2;
       --gray-600: #5f6b82;
       --gray-800: #26324b;
-      --danger: #d9534f;
-      --warning: #f0ad4e;
-      --success: #1d9e75;
       --shadow: 0 12px 30px rgba(19,34,87,.12);
-      --radius: 18px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       background: linear-gradient(180deg, #f4f7fc 0%, #eef3fb 100%);
       color: var(--gray-800);
       min-height: 100vh;
     }
 
-    /* ── TOPBAR ── */
+    /* TOPBAR */
     .topbar {
       background: var(--navy);
       color: #fff;
@@ -52,16 +40,9 @@
       top: 0;
       z-index: 100;
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 18px;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
     .brand-badge {
-      width: 40px; height: 40px;
-      border-radius: 12px;
+      width: 40px; height: 40px; border-radius: 12px;
       background: linear-gradient(135deg, #4f8ef7, #8fb6ff);
       display: grid; place-items: center;
       font-weight: 800; color: #fff; font-size: 15px;
@@ -69,85 +50,44 @@
     .nav { display: none; flex-wrap: wrap; gap: 8px; }
     .nav.active { display: flex; }
     .nav button {
-      border: 0;
-      background: rgba(255,255,255,.12);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: background .15s;
+      border: 0; background: rgba(255,255,255,.12); color: #fff;
+      padding: 8px 14px; border-radius: 999px; cursor: pointer;
+      font-weight: 600; font-size: 14px; transition: background .15s;
     }
     .nav button:hover { background: rgba(255,255,255,.22); }
     .nav button.active { background: #fff; color: var(--navy); }
-
-    .user-info {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      color: rgba(255,255,255,.85);
-      font-size: 14px;
-    }
+    .user-info { display: none; align-items: center; gap: 10px; color: rgba(255,255,255,.85); font-size: 14px; }
     .user-info.active { display: flex; }
     .logout-btn {
-      border: 1px solid rgba(255,255,255,.3);
-      background: transparent;
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: background .15s;
+      border: 1px solid rgba(255,255,255,.3); background: transparent;
+      color: #fff; padding: 6px 14px; border-radius: 999px;
+      cursor: pointer; font-size: 13px; font-weight: 600;
     }
     .logout-btn:hover { background: rgba(255,255,255,.15); }
 
-    /* ── CONTAINER ── */
+    /* CONTAINER */
     .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
 
-    /* ── AUTH WRAP ── */
+    /* AUTH */
     .auth-wrap { display: none; }
     .auth-wrap.active { display: block; }
-
     .login-card {
-      max-width: 440px;
-      margin: 40px auto 0;
-      background: #fff;
-      border: 1px solid var(--gray-200);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: 36px 32px;
+      max-width: 440px; margin: 48px auto 0;
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 28px; box-shadow: var(--shadow); padding: 36px 32px;
     }
-    .login-card h2 {
-      font-size: 22px;
-      color: var(--navy);
-      margin-bottom: 6px;
-    }
-    .login-card p {
-      color: var(--gray-600);
-      font-size: 14px;
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-
+    .login-card h2 { font-size: 22px; color: var(--navy); margin-bottom: 6px; }
+    .subtitle { color: var(--gray-600); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
     .form-group { margin-bottom: 16px; }
     .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--gray-600);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .4px;
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--gray-600); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: .5px;
     }
     .form-group input {
-      width: 100%;
-      border: 1.5px solid var(--gray-300);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 15px;
-      outline: none;
+      width: 100%; border: 1.5px solid var(--gray-300);
+      border-radius: 12px; padding: 12px 14px;
+      font-size: 15px; outline: none;
       background: var(--gray-50);
       transition: border-color .15s, box-shadow .15s;
       color: var(--gray-800);
@@ -158,9 +98,10 @@
       background: #fff;
     }
 
-    /* password field with eye icon */
+    /* PASSWORD WRAP */
     .pw-wrap { position: relative; }
-    .pw-wrap input { padding-right: 46px; }
+    .pw-wrap input { padding-right: 50px; }
+
     .eye-btn {
       position: absolute;
       right: 12px;
@@ -170,127 +111,85 @@
       background: transparent;
       color: var(--gray-400);
       cursor: pointer;
-      padding: 4px;
+      padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 6px;
       transition: color .15s;
+      z-index: 5;
     }
     .eye-btn:hover { color: var(--navy); }
     .eye-btn.visible { color: var(--accent); }
-    .eye-btn svg { width: 18px; height: 18px; }
+    .eye-btn svg { width: 20px; height: 20px; display: block; pointer-events: none; }
 
-    /* tooltip on eye hover */
     .eye-tooltip {
       position: absolute;
       right: 0;
-      top: -34px;
+      top: -36px;
       background: var(--navy);
       color: #fff;
       font-size: 11px;
       font-weight: 600;
-      padding: 5px 9px;
+      padding: 5px 10px;
       border-radius: 8px;
       white-space: nowrap;
       pointer-events: none;
       opacity: 0;
       transform: translateY(4px);
       transition: opacity .15s, transform .15s;
+      z-index: 10;
     }
     .eye-tooltip::after {
       content: '';
-      position: absolute;
-      bottom: -5px;
-      right: 14px;
+      position: absolute; bottom: -5px; right: 14px;
       border: 5px solid transparent;
-      border-top-color: var(--navy);
-      border-bottom: 0;
+      border-top-color: var(--navy); border-bottom: 0;
     }
-    .eye-btn:hover + .eye-tooltip,
-    .eye-btn:focus + .eye-tooltip {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .eye-btn:hover + .eye-tooltip { opacity: 1; transform: translateY(0); }
 
-    .btn-primary {
+    /* LOGIN BUTTON */
+    .btn-login {
       width: 100%;
       background: var(--navy);
       color: #fff;
       border: 0;
       border-radius: 12px;
-      padding: 13px;
+      padding: 14px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       margin-top: 8px;
       transition: background .15s, transform .1s;
+      display: block;
     }
-    .btn-primary:hover { background: var(--navy-light); }
-    .btn-primary:active { transform: scale(.98); }
+    .btn-login:hover { background: var(--navy-light); }
+    .btn-login:active { transform: scale(.98); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-    .alert {
-      margin-top: 14px;
-      padding: 11px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-      display: none;
-    }
+    /* ALERT */
+    .alert { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 14px; line-height: 1.5; display: none; }
     .alert.error { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; display: block; }
     .alert.success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; display: block; }
 
-    /* ── MAIN WRAP ── */
+    /* MAIN */
     .main-wrap { display: none; }
     .main-wrap.active { display: block; }
-
     .hero {
       background: linear-gradient(135deg, rgba(19,34,87,.96), rgba(30,50,114,.93));
-      color: #fff;
-      border-radius: 28px;
-      padding: 32px 28px;
-      box-shadow: var(--shadow);
-      margin-bottom: 22px;
+      color: #fff; border-radius: 28px; padding: 32px 28px;
+      box-shadow: var(--shadow); margin-bottom: 22px;
     }
     .hero h1 { font-size: 30px; margin-bottom: 8px; }
     .hero p { color: rgba(255,255,255,.75); line-height: 1.6; max-width: 700px; font-size: 15px; }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid var(--gray-200);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
+    .cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+    .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); }
     .card .label { font-size: 13px; color: var(--gray-600); margin-bottom: 10px; }
     .card .value { font-size: 28px; font-weight: 800; color: var(--navy); }
-
-    .panel {
-      background: #fff;
-      border: 1px solid var(--gray-200);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 18px;
-    }
+    .panel { background: #fff; border: 1px solid var(--gray-200); border-radius: 24px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 18px; }
     .panel h2 { font-size: 20px; color: var(--navy); margin-bottom: 12px; }
     .panel p { color: var(--gray-600); line-height: 1.6; font-size: 15px; }
-
-    .footer {
-      text-align: center;
-      color: var(--gray-400);
-      font-size: 13px;
-      padding: 16px 0 8px;
-    }
-
-    /* ── UTILS ── */
-    .hidden { display: none !important; }
+    .footer { text-align: center; color: var(--gray-400); font-size: 13px; padding: 16px 0 8px; }
 
     @media (max-width: 1024px) { .cards { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 700px) {
@@ -318,7 +217,7 @@
     </nav>
     <div class="user-info" id="userInfo">
       <span id="userEmail"></span>
-      <button class="logout-btn" onclick="signOut()">Logout</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
   </div>
 
@@ -328,7 +227,7 @@
     <div class="auth-wrap active" id="authWrap">
       <div class="login-card">
         <h2>Masuk ke Sistem</h2>
-        <p>Login dengan email dan password akun kamu.</p>
+        <p class="subtitle">Login dengan email dan password akun kamu.</p>
 
         <div class="form-group">
           <label>Email</label>
@@ -338,9 +237,8 @@
         <div class="form-group">
           <label>Password</label>
           <div class="pw-wrap">
-            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
-            <button class="eye-btn" type="button" id="eyeBtn" onclick="togglePw()" aria-label="Toggle password visibility">
-              <!-- eye icon -->
+            <input id="loginPassword" type="password" placeholder="Masukkan password" autocomplete="current-password" />
+            <button class="eye-btn" type="button" id="eyeBtn" aria-label="Toggle password">
               <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -350,7 +248,7 @@
           </div>
         </div>
 
-        <button class="btn-primary" onclick="signIn()">Login</button>
+        <button class="btn-login" id="loginBtn" type="button">Login</button>
         <div class="alert" id="loginAlert"></div>
       </div>
     </div>
@@ -361,31 +259,16 @@
         <h1>Platform Audit Terintegrasi</h1>
         <p>Sistem monitoring dan audit operasional untuk holding mining. Kelola IUP, IUJP, EWS, temuan lapangan, dan laporan BoD dalam satu platform.</p>
       </div>
-
       <div class="cards">
-        <div class="card">
-          <div class="label">Total Audit Aktif</div>
-          <div class="value" id="metricAudit">—</div>
-        </div>
-        <div class="card">
-          <div class="label">PA/UA Rata-rata</div>
-          <div class="value" id="metricPaua">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Temuan Terbuka</div>
-          <div class="value" id="metricTemuan">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Data EWS Aktif</div>
-          <div class="value" id="metricEws">—</div>
-        </div>
+        <div class="card"><div class="label">Total Audit Aktif</div><div class="value" id="metricAudit">—</div></div>
+        <div class="card"><div class="label">PA/UA Rata-rata</div><div class="value" id="metricPaua">—</div></div>
+        <div class="card"><div class="label">Temuan Terbuka</div><div class="value" id="metricTemuan">—</div></div>
+        <div class="card"><div class="label">Data EWS Aktif</div><div class="value" id="metricEws">—</div></div>
       </div>
-
       <div class="panel">
         <h2>Dashboard</h2>
-        <p>Selamat datang di dibup Audit System. Pilih modul dari navbar untuk mulai bekerja. Modul HRM, EWS, Rekonsiliasi Tonnase, dan Kimi Analysis akan segera tersedia.</p>
+        <p>Selamat datang di dibup Audit System. Pilih modul dari navbar untuk mulai bekerja.</p>
       </div>
-
       <div class="footer">dibup Audit System · Navy #132257 · Supabase Auth + PostgreSQL + Storage</div>
     </div>
 
@@ -393,108 +276,92 @@
 
   <script>
     // ── SUPABASE INIT ──
-    // Ganti 2 nilai ini dengan kredensial Supabase project kamu
-    const SUPABASE_URL = 'GANTI_DENGAN_SUPABASE_URL_KAMU';
-    const SUPABASE_ANON_KEY = 'GANTI_DENGAN_SUPABASE_ANON_KEY_KAMU';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = 'https://nvdxfsuddbkoubsdyikc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZHhmc3VkZGJrb3Vic2R5aWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NjMyNzEsImV4cCI6MjA5MzUzOTI3MX0.1b_y3QOuqJ4lqNJmGm0wECxPxRvSx2665U_eHMTbpIM';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ── EYE ICON TOGGLE ──
+    // ── ELEMENTS ──
+    const loginEmailEl   = document.getElementById('loginEmail');
+    const loginPasswordEl= document.getElementById('loginPassword');
+    const loginBtnEl     = document.getElementById('loginBtn');
+    const loginAlertEl   = document.getElementById('loginAlert');
+    const eyeBtnEl       = document.getElementById('eyeBtn');
+    const eyeIconEl      = document.getElementById('eyeIcon');
+    const eyeTooltipEl   = document.getElementById('eyeTooltip');
+    const authWrapEl     = document.getElementById('authWrap');
+    const mainWrapEl     = document.getElementById('mainWrap');
+    const mainNavEl      = document.getElementById('mainNav');
+    const userInfoEl     = document.getElementById('userInfo');
+    const userEmailEl    = document.getElementById('userEmail');
+    const logoutBtnEl    = document.getElementById('logoutBtn');
+
+    // ── EYE TOGGLE ──
     let pwVisible = false;
-    function togglePw() {
+    eyeBtnEl.addEventListener('click', function(e) {
+      e.preventDefault();
       pwVisible = !pwVisible;
-      const input = document.getElementById('loginPassword');
-      const btn = document.getElementById('eyeBtn');
-      const tooltip = document.getElementById('eyeTooltip');
-      const icon = document.getElementById('eyeIcon');
+      loginPasswordEl.type = pwVisible ? 'text' : 'password';
+      eyeBtnEl.classList.toggle('visible', pwVisible);
+      eyeTooltipEl.textContent = pwVisible ? 'Hide password' : 'Show password';
+      eyeIconEl.innerHTML = pwVisible
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
+    });
 
-      input.type = pwVisible ? 'text' : 'password';
-      btn.classList.toggle('visible', pwVisible);
-      tooltip.textContent = pwVisible ? 'Hide password' : 'Show password';
-
-      // swap icon: eye vs eye-off
-      if (pwVisible) {
-        icon.innerHTML = `
-          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-          <line x1="1" y1="1" x2="23" y2="23"/>`;
-      } else {
-        icon.innerHTML = `
-          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-          <circle cx="12" cy="12" r="3"/>`;
-      }
-    }
-
-    // ── AUTH HELPERS ──
+    // ── SHOW/HIDE VIEWS ──
     function showMain(user) {
-      document.getElementById('authWrap').classList.remove('active');
-      document.getElementById('mainWrap').classList.add('active');
-      document.getElementById('mainNav').classList.add('active');
-      const ui = document.getElementById('userInfo');
-      ui.classList.add('active');
-      document.getElementById('userEmail').textContent = user?.email || '';
+      authWrapEl.classList.remove('active');
+      mainWrapEl.classList.add('active');
+      mainNavEl.classList.add('active');
+      userInfoEl.classList.add('active');
+      userEmailEl.textContent = user?.email || '';
     }
-
     function showAuth() {
-      document.getElementById('mainWrap').classList.remove('active');
-      document.getElementById('authWrap').classList.add('active');
-      document.getElementById('mainNav').classList.remove('active');
-      document.getElementById('userInfo').classList.remove('active');
+      mainWrapEl.classList.remove('active');
+      authWrapEl.classList.add('active');
+      mainNavEl.classList.remove('active');
+      userInfoEl.classList.remove('active');
     }
-
     function setAlert(msg, type) {
-      const el = document.getElementById('loginAlert');
-      el.textContent = msg;
-      el.className = 'alert ' + type;
+      loginAlertEl.textContent = msg;
+      loginAlertEl.className = 'alert ' + type;
     }
 
     // ── LOGIN ──
-    async function signIn() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
+    async function doLogin() {
+      const email    = loginEmailEl.value.trim();
+      const password = loginPasswordEl.value;
+      if (!email || !password) { setAlert('Email dan password wajib diisi.', 'error'); return; }
 
-      if (!email || !password) {
-        setAlert('Email dan password wajib diisi.', 'error');
-        return;
-      }
+      loginBtnEl.textContent = 'Masuk...';
+      loginBtnEl.disabled = true;
 
-      const btn = document.querySelector('.btn-primary');
-      btn.textContent = 'Masuk...';
-      btn.disabled = true;
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      loginBtnEl.textContent = 'Login';
+      loginBtnEl.disabled = false;
 
-      btn.textContent = 'Login';
-      btn.disabled = false;
-
-      if (error) {
-        setAlert('Login gagal: ' + error.message, 'error');
-        return;
-      }
-
+      if (error) { setAlert('Login gagal: ' + error.message, 'error'); return; }
       showMain(data.user);
     }
 
+    loginBtnEl.addEventListener('click', doLogin);
+
     // ── LOGOUT ──
-    async function signOut() {
-      await supabase.auth.signOut();
+    logoutBtnEl.addEventListener('click', async function() {
+      await sb.auth.signOut();
       showAuth();
-    }
+    });
 
     // ── ENTER KEY ──
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && document.getElementById('authWrap').classList.contains('active')) {
-        signIn();
-      }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && authWrapEl.classList.contains('active')) doLogin();
     });
 
     // ── CHECK SESSION ON LOAD ──
-    window.addEventListener('load', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        showMain(session.user);
-      } else {
-        showAuth();
-      }
+    window.addEventListener('load', async function() {
+      const { data: { session } } = await sb.auth.getSession();
+      session ? showMain(session.user) : showAuth();
     });
   </script>
 </body>
