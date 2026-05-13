@@ -511,113 +511,61 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "PASTE_SUPABASE_URL_DI_SINI";
-    const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_DI_SINI";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  function togglePassword(inputId, btnId){
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if(!input || !btn) return;
+    const hidden = input.type === 'password';
+    input.type = hidden ? 'text' : 'password';
+    btn.classList.toggle('active', hidden);
+  }
 
-    function goSection(name){
-      const status = document.getElementById('authStatus');
-      if(status) status.textContent = 'Menu dipilih: ' + name;
-    }
+  function toggleDotMenu(){
+    const menu = document.getElementById('dotMenu');
+    if(menu) menu.classList.toggle('active');
+  }
 
-    function togglePassword(inputId, btnId){
-      const input = document.getElementById(inputId);
-      const btn = document.getElementById(btnId);
-      if(!input || !btn) return;
-      const isHidden = input.type === 'password';
-      input.type = isHidden ? 'text' : 'password';
-      btn.classList.toggle('active', !isHidden);
-    }
+  function closeDotMenu(){
+    const menu = document.getElementById('dotMenu');
+    if(menu) menu.classList.remove('active');
+  }
 
-    function showMain(){
-      document.getElementById('authWrap').classList.remove('active');
-      document.getElementById('mainWrap').classList.add('active');
-    }
+  function showMain(){
+    document.getElementById('authWrap').classList.add('hidden');
+    document.getElementById('mainWrap').classList.add('active');
+    document.getElementById('mainNav').classList.add('active');
+    document.getElementById('menuDot').classList.add('active');
+  }
 
-    function showAuth(){
-      document.getElementById('mainWrap').classList.remove('active');
-      document.getElementById('authWrap').classList.add('active');
-    }
+  function showAuth(){
+    document.getElementById('mainWrap').classList.remove('active');
+    document.getElementById('authWrap').classList.remove('hidden');
+    document.getElementById('mainNav').classList.remove('active');
+    document.getElementById('menuDot').classList.remove('active');
+    closeDotMenu();
+  }
 
-    function isRecoveryMode(){
-      return location.search.includes('mode=recovery') || location.hash.includes('type=recovery');
-    }
+  async function signIn(){
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    if(!email || !password) return;
 
-    async function handleRecoveryMode(){
-      showAuth();
-      const panel = document.getElementById('resetPanel');
-      if(panel) panel.classList.remove('hidden');
-      const authStatus = document.getElementById('authStatus');
-      if(authStatus) authStatus.textContent = 'Status: mode reset password aktif';
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) return;
 
-    async function signIn(){
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+    showMain();
+  }
 
-      if(!email || !password){
-        document.getElementById('authStatus').textContent = 'Status: isi email dan password dulu';
-        return;
-      }
+  async function signOut(){
+    await supabase.auth.signOut();
+    showAuth();
+  }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if(error){
-        document.getElementById('authStatus').textContent = 'Login gagal: ' + error.message;
-        return;
-      }
-
-      document.getElementById('authStatus').textContent = 'Login berhasil: ' + (data.user?.email || email);
-      showMain();
-    }
-
-    async function signOut(){
-      const { error } = await supabase.auth.signOut();
-      if(error){
-        document.getElementById('authStatus').textContent = 'Logout gagal: ' + error.message;
-        return;
-      }
-      document.getElementById('authStatus').textContent = 'Status: sudah logout';
-      showAuth();
-    }
-
-    async function saveNewPassword(){
-      const pass1 = document.getElementById('newPassword').value.trim();
-      const pass2 = document.getElementById('confirmPassword').value.trim();
-
-      if(!pass1 || !pass2){
-        document.getElementById('resetStatus').textContent = 'Isi password baru dulu';
-        return;
-      }
-      if(pass1 !== pass2){
-        document.getElementById('resetStatus').textContent = 'Password tidak sama';
-        return;
-      }
-
-      const { error } = await supabase.auth.updateUser({ password: pass1 });
-
-      if(error){
-        document.getElementById('resetStatus').textContent = 'Gagal simpan password: ' + error.message;
-        return;
-      }
-
-      document.getElementById('resetStatus').textContent = 'Password berhasil diganti. Silakan login ulang.';
-      document.getElementById('resetPanel').classList.add('hidden');
-      document.getElementById('authStatus').textContent = 'Status: password baru tersimpan';
-    }
-
-    if (isRecoveryMode()) {
-      window.addEventListener('load', handleRecoveryMode);
-    }
-
-    window.addEventListener('load', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if(session){
-        showMain();
-        const authStatus = document.getElementById('authStatus');
-        if(authStatus) authStatus.textContent = 'Login aktif: ' + (session.user?.email || 'user');
-      }
-    });
-  </script>
+  window.addEventListener('load', async () => {
+    showAuth();
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session) showMain();
+  });
+</script>
 </body>
 </html>
