@@ -1,21 +1,336 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <title>audit-hrm - Coal Getting</title>
-  <script src="https://supabase.com"></script> <!-- link sebenarnya akan diisi -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dibup Audit System</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --navy: #132257; --accent: #XXXXXX; }
+    :root{
+      --navy:#132257;
+      --navy-dark:#0c1a42;
+      --navy-light:#1e3272;
+      --accent:#4f8ef7;
+      --accent-light:#dce8ff;
+      --teal:#1D9E75;
+      --teal-light:#E1F5EE;
+      --white:#ffffff;
+      --gray-50:#f8f9fb;
+      --gray-100:#f0f2f7;
+      --gray-200:#e2e6ef;
+      --gray-300:#c9d1e2;
+      --gray-400:#9aa3b2;
+      --gray-600:#5f6b82;
+      --gray-800:#26324b;
+      --danger:#d9534f;
+      --warning:#f0ad4e;
+      --success:#1d9e75;
+      --shadow:0 12px 30px rgba(19,34,87,.12);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg, #f4f7fc 0%, #eef3fb 100%);
+      color:var(--gray-800);
+    }
+    .wrap{min-height:100vh}
+    .topbar{
+      background:var(--navy);
+      color:#fff;
+      padding:14px 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      box-shadow:0 4px 18px rgba(0,0,0,.18);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      font-size:18px;
+      letter-spacing:.3px;
+    }
+    .brand-badge{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg, #4f8ef7, #8fb6ff);
+      display:grid;place-items:center;
+      font-weight:800;color:#fff;
+    }
+    .nav{
+      display:flex;flex-wrap:wrap;gap:8px;
+    }
+    .nav button{
+      border:0;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .nav button.active{background:#fff;color:var(--navy)}
+    .container{max-width:1280px;margin:0 auto;padding:24px}
+    .hero{
+      background:
+        linear-gradient(135deg, rgba(19,34,87,.95), rgba(30,50,114,.92)),
+        radial-gradient(circle at top right, rgba(79,142,247,.35), transparent 35%);
+      color:#fff;
+      border-radius:28px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero h1{margin:0 0 10px;font-size:34px}
+    .hero p{margin:0;max-width:900px;line-height:1.6;color:#e8eeff}
+    .cards{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+    .card{
+      background:#fff;
+      border:1px solid var(--gray-200);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .card .label{font-size:13px;color:var(--gray-600);margin-bottom:10px}
+    .card .value{font-size:26px;font-weight:800;color:var(--navy)}
+    .grid{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+    .panel{
+      background:#fff;
+      border:1px solid var(--gray-200);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+    .panel h2{margin:0 0 14px;font-size:20px}
+    .subtext{color:var(--gray-600);line-height:1.6}
+    .login{
+      display:grid;
+      gap:12px;
+      margin-top:8px;
+    }
+    .login input, .login select, .login button, .login textarea{
+      width:100%;
+      border:1px solid var(--gray-300);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:15px;
+      outline:none;
+    }
+    .login button{
+      background:var(--navy);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .login button.secondary{
+      background:#fff;
+      color:var(--navy);
+      border:1px solid var(--navy);
+    }
+    .status{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--gray-50);
+      border:1px dashed var(--gray-300);
+      color:var(--gray-800);
+      line-height:1.5;
+      white-space:pre-wrap;
+    }
+    .menu-grid{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+    .menu-item{
+      background:linear-gradient(180deg, #ffffff, #f7f9ff);
+      border:1px solid var(--gray-200);
+      border-radius:18px;
+      padding:16px;
+      min-height:120px;
+    }
+    .menu-item h3{margin:0 0 8px;color:var(--navy)}
+    .tag{
+      display:inline-block;
+      margin-top:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--accent-light);
+      color:var(--navy);
+      font-size:12px;
+      font-weight:700;
+    }
+    .footer{
+      margin:24px 0 10px;
+      text-align:center;
+      color:var(--gray-600);
+      font-size:13px;
+    }
+    .hidden{display:none !important;}
+    @media (max-width: 1024px){
+      .cards,.grid,.menu-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 700px){
+      .topbar{flex-direction:column;align-items:flex-start}
+      .cards,.grid,.menu-grid{grid-template-columns:1fr}
+      .hero h1{font-size:28px}
+    }
   </style>
 </head>
 <body>
-  <div class="hrm-header"> <!-- Nama kontraktor, Lokasi pit, Shift, Tanggal jam, etc. -->
-  </div>
-  <div class="tab-coal-getting"> <!-- 13 poin, dropdown skor 1–5, checkbox Ya/Tidak, etc. -->
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">DB</div>
+        <div>dibup Audit System</div>
+      </div>
+      <div class="nav">
+        <button class="active" onclick="goSection('dashboard')">Dashboard</button>
+        <button onclick="goSection('ews')">EWS</button>
+        <button onclick="goSection('audit')">Audit</button>
+        <button onclick="goSection('compliance')">Compliance</button>
+        <button onclick="goSection('report')">Report</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="hero">
+        <h1>Platform audit terintegrasi untuk holding mining</h1>
+        <p>
+          Sistem ini dibuat untuk mendukung audit harian, monitoring EWS, laporan, dan modul operasional.
+          Untuk tahap awal, halaman ini menampilkan struktur dasar dulu supaya repo lo balik aman dan siap dikembangkan bertahap.
+        </p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="label">Total Audit Aktif</div>
+          <div class="value" id="metricAudit">0</div>
+        </div>
+        <div class="card">
+          <div class="label">PA/UA Rata-rata</div>
+          <div class="value" id="metricPaua">0%</div>
+        </div>
+        <div class="card">
+          <div class="label">Temuan Terbuka</div>
+          <div class="value" id="metricTemuan">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Data EWS Periode Aktif</div>
+          <div class="value" id="metricEws">0</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel" id="dashboardPanel">
+          <h2>Dashboard</h2>
+          <p class="subtext">
+            Area ini nanti dipakai buat ringkasan data perusahaan, switch IUP/IUJP, dan akses cepat ke modul audit.
+            Untuk sekarang masih versi dasar supaya file utama bisa jalan normal dulu.
+          </p>
+
+          <div class="menu-grid">
+            <div class="menu-item">
+              <h3>IUP</h3>
+              <div>Data perusahaan IUP terpisah di database Supabase.</div>
+              <span class="tag">Ready to extend</span>
+            </div>
+            <div class="menu-item">
+              <h3>IUJP</h3>
+              <div>Data perusahaan IUJP juga dipisah total.</div>
+              <span class="tag">Ready to extend</span>
+            </div>
+            <div class="menu-item">
+              <h3>HRM</h3>
+              <div>Nanti diisi modul Coal Getting, Hauling, Road Maintenance, dan lainnya.</div>
+              <span class="tag">Next build</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="authPanel">
+          <h2>Login Supabase</h2>
+          <p class="subtext">Masukkan email dan password untuk masuk ke sistem.</p>
+
+          <div class="login">
+            <input id="email" type="email" placeholder="Email" />
+            <input id="password" type="password" placeholder="Password" />
+            <button onclick="signIn()">Login</button>
+            <button class="secondary" onclick="signOut()">Logout</button>
+          </div>
+
+          <div class="status" id="authStatus">Status: belum login</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <h2>Menu Utama</h2>
+        <p class="subtext">
+          Setelah struktur ini aman, kita lanjut isi satu modul per sesi: EWS, HRM, Rekonsiliasi Tonnase, PICA, Tren, lalu Kimi Analysis.
+        </p>
+      </div>
+
+      <div class="footer">
+        dibup Audit System • Navy #132257 • Supabase Auth + Storage + PostgreSQL
+      </div>
+    </div>
   </div>
 
-  <!-- script Supabase insert ke table hrm_audits -->
   <script>
-    // Supabase client, auth, insert
+    const SUPABASE_URL = "https://nvdxfsuddbkoubsdyikc.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZHhmc3VkZGJrb3Vic2R5aWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NjMyNzEsImV4cCI6MjA5MzUzOTI3MX0.1b_y3QOuqJ4lqNJmGm0wECxPxRvSx2665U_eHMTbpIM";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function goSection(name){
+      const status = document.getElementById('authStatus');
+      status.textContent = 'Menu dipilih: ' + name;
+    }
+
+    async function signIn(){
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if(!email || !password){
+        document.getElementById('authStatus').textContent = 'Status: isi email dan password dulu';
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if(error){
+        document.getElementById('authStatus').textContent = 'Login gagal: ' + error.message;
+        return;
+      }
+
+      document.getElementById('authStatus').textContent = 'Login berhasil: ' + (data.user?.email || email);
+    }
+
+    async function signOut(){
+      const { error } = await supabase.auth.signOut();
+      if(error){
+        document.getElementById('authStatus').textContent = 'Logout gagal: ' + error.message;
+        return;
+      }
+      document.getElementById('authStatus').textContent = 'Status: sudah logout';
+    }
   </script>
 </body>
 </html>
