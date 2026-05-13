@@ -125,6 +125,24 @@
       gap:12px;
       margin-top:8px;
     }
+    .field-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .field-row input{
+      flex:1;
+    }
+    .toggle-btn{
+      min-width:92px;
+      border:1px solid var(--gray-300);
+      background:#fff;
+      color:var(--navy);
+      padding:12px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+    }
     .login input, .login select, .login button, .login textarea{
       width:100%;
       border:1px solid var(--gray-300);
@@ -185,6 +203,12 @@
       font-size:13px;
     }
     .hidden{display:none !important;}
+    .reset-box{
+      margin-top:16px;
+      background:#fff7eb;
+      border:1px solid #f0ad4e;
+    }
+    .small-note{font-size:12px;color:var(--gray-600);margin-top:4px}
     @media (max-width: 1024px){
       .cards,.grid,.menu-grid{grid-template-columns:1fr 1fr}
     }
@@ -192,6 +216,8 @@
       .topbar{flex-direction:column;align-items:flex-start}
       .cards,.grid,.menu-grid{grid-template-columns:1fr}
       .hero h1{font-size:28px}
+      .field-row{flex-direction:column;align-items:stretch}
+      .toggle-btn{width:100%}
     }
   </style>
 </head>
@@ -272,12 +298,40 @@
 
           <div class="login">
             <input id="email" type="email" placeholder="Email" />
-            <input id="password" type="password" placeholder="Password" />
+            <div class="field-row">
+              <input id="password" type="password" placeholder="Password" />
+              <button class="toggle-btn" type="button" onclick="togglePassword('password','toggleMain')">
+                Show
+              </button>
+            </div>
             <button onclick="signIn()">Login</button>
             <button class="secondary" onclick="signOut()">Logout</button>
           </div>
 
           <div class="status" id="authStatus">Status: belum login</div>
+
+          <div class="panel hidden reset-box" id="resetPanel">
+            <h2>Reset Password</h2>
+            <p class="subtext">Masukkan password baru dua kali, lalu simpan.</p>
+
+            <div class="login">
+              <div class="field-row">
+                <input id="newPassword" type="password" placeholder="Password baru" />
+                <button class="toggle-btn" type="button" onclick="togglePassword('newPassword','toggleNew1')">
+                  Show
+                </button>
+              </div>
+              <div class="field-row">
+                <input id="confirmPassword" type="password" placeholder="Ulangi password baru" />
+                <button class="toggle-btn" type="button" onclick="togglePassword('confirmPassword','toggleNew2')">
+                  Show
+                </button>
+              </div>
+              <button onclick="saveNewPassword()">Simpan Password Baru</button>
+            </div>
+
+            <div class="status" id="resetStatus">Status: menunggu password baru</div>
+          </div>
         </div>
       </div>
 
@@ -295,13 +349,22 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://nvdxfsuddbkoubsdyikc.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZHhmc3VkZGJrb3Vic2R5aWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NjMyNzEsImV4cCI6MjA5MzUzOTI3MX0.1b_y3QOuqJ4lqNJmGm0wECxPxRvSx2665U_eHMTbpIM";
+    const SUPABASE_URL = "PASTE_SUPABASE_URL_DI_SINI";
+    const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_DI_SINI";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function goSection(name){
       const status = document.getElementById('authStatus');
       status.textContent = 'Menu dipilih: ' + name;
+    }
+
+    function togglePassword(inputId, btnId){
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      if(!input || !btn) return;
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.textContent = isHidden ? 'Hide' : 'Show';
     }
 
     async function signIn(){
@@ -330,6 +393,47 @@
         return;
       }
       document.getElementById('authStatus').textContent = 'Status: sudah logout';
+    }
+
+    function isRecoveryMode(){
+      return location.search.includes('mode=recovery') || location.hash.includes('type=recovery');
+    }
+
+    async function handleRecoveryMode(){
+      const panel = document.getElementById('resetPanel');
+      if(panel) panel.classList.remove('hidden');
+      const authStatus = document.getElementById('authStatus');
+      if(authStatus) authStatus.textContent = 'Status: mode reset password aktif';
+    }
+
+    async function saveNewPassword(){
+      const pass1 = document.getElementById('newPassword').value.trim();
+      const pass2 = document.getElementById('confirmPassword').value.trim();
+
+      if(!pass1 || !pass2){
+        document.getElementById('resetStatus').textContent = 'Isi password baru dulu';
+        return;
+      }
+      if(pass1 !== pass2){
+        document.getElementById('resetStatus').textContent = 'Password tidak sama';
+        return;
+      }
+
+      const { data, error } = await supabase.auth.updateUser({ password: pass1 });
+
+      if(error){
+        document.getElementById('resetStatus').textContent = 'Gagal simpan password: ' + error.message;
+        return;
+      }
+
+      document.getElementById('resetStatus').textContent = 'Password berhasil diganti. Silakan login ulang.';
+      const panel = document.getElementById('resetPanel');
+      if(panel) panel.classList.add('hidden');
+      document.getElementById('authStatus').textContent = 'Status: password baru tersimpan';
+    }
+
+    if (isRecoveryMode()) {
+      window.addEventListener('load', handleRecoveryMode);
     }
   </script>
 </body>
