@@ -471,6 +471,7 @@
       flex-shrink: 0;
       align-self: stretch;
       min-height: 300px;
+      /* no border so blend is seamless */
     }
     .slide-img {
       position: absolute;
@@ -481,6 +482,8 @@
       opacity: 0;
       transition: opacity 1.5s ease;
       mix-blend-mode: luminosity;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.85) 55%, black 100%);
+      mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.85) 55%, black 100%);
     }
     .slide-img.active {
       opacity: 0.32;
