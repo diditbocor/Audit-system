@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRM Form Audit — dibup Audit System</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy: #132257;
+  --navy-dark: #0c1a40;
+  --navy-mid: #1a2f6e;
+  --navy-light: #243580;
+  --blue-accent: #4f8ef7;
+  --blue-light: #7eb3ff;
+  --blue-pale: #ddeeff;
+  --white: #ffffff;
+  --off-white: #f4f7ff;
+  --gray-light: #e8edf5;
+  --gray-mid: #b8c4d8;
+  --gray-text: #6b7a99;
+  --green: #22c55e;
+  --green-light: #dcfce7;
+  --yellow: #f59e0b;
+  --yellow-light: #fef3c7;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --orange: #f97316;
+  --orange-light: #ffedd5;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 12px rgba(19,34,87,0.10);
+  --shadow-lg: 0 8px 32px rgba(19,34,87,0.16);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: #e8edf5;
+  color: var(--navy);
+  min-height: 100vh;
+}
+
+/* ── TOP HEADER ── */
+.top-header {
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(19,34,87,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.top-header .brand-icon {
+  width: 44px; height: 44px;
+  background: var(--blue-accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 18px;
+  color: white;
+  letter-spacing: -1px;
+}
+.top-header .brand-text h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: white; letter-spacing: 0.5px;
+}
+.top-header .brand-text p {
+  font-size: 11px; color: var(--blue-light);
+  font-weight: 400; letter-spacing: 0.3px;
+}
+.top-header .header-right {
+  display: flex; align-items: center; gap: 12px;
+}
+.db-status {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px; color: var(--blue-light);
+}
+.db-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--gray-mid);
+  transition: background 0.3s;
+}
+.db-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.db-dot.error { background: var(--red); }
+
+.back-btn {
+  background: rgba(255,255,255,0.10);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.20);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600; font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.back-btn:hover { background: rgba(255,255,255,0.18); }
+
+.save-btn {
+  background: var(--blue-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600; font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.2s;
+}
+.save-btn:hover { background: var(--blue-light); transform: translateY(-1px); }
+.save-btn:active { transform: translateY(0); }
+
+/* ── MAIN CONTAINER ── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+/* ── SECTION CARD ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.card-header {
+  background: var(--navy);
+  padding: 14px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px; font-weight: 700;
+  color: white; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-header h2 span.icon { font-size: 16px; }
+.card-body { padding: 22px; }
+
+/* ── FORM GRID ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label {
+  font-size: 11px; font-weight: 600;
+  color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1.5px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13.5px; color: var(--navy);
+  background: var(--off-white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--blue-accent);
+  box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+  background: white;
+}
+.form-group textarea { resize: vertical; min-height: 72px; }
+.form-group select { cursor: pointer; }
+
+/* ── BADGE STATUS ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.badge-green { background: var(--green-light); color: #16a34a; }
+.badge-yellow { background: var(--yellow-light); color: #d97706; }
+.badge-red { background: var(--red-light); color: #dc2626; }
+.badge-blue { background: var(--blue-pale); color: #2563eb; }
+.badge-gray { background: var(--gray-light); color: var(--gray-text); }
+.badge-navy { background: var(--navy); color: white; }
+
+/* ── ISO BADGE ── */
+.iso-badge {
+  display: inline-flex;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-right: 3px;
+}
+.iso-9001 { background: #dbeafe; color: #1d4ed8; }
+.iso-14001 { background: #d1fae5; color: #065f46; }
+.iso-45001 { background: #fef3c7; color: #92400e; }
+.iso-smkp { background: #ede9fe; color: #5b21b6; }
+
+/* ── TABS ── */
+.tabs-wrapper {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.tabs-nav {
+  display: flex;
+  background: var(--navy-dark);
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0;
+}
+.tabs-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 14px 22px;
+  background: transparent;
+  border: none;
+  color: var(--gray-mid);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+}
+.tab-btn:hover { color: var(--blue-light); }
+.tab-btn.active {
+  color: white;
+  background: rgba(79,142,247,0.15);
+}
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--blue-accent);
+  border-radius: 3px 3px 0 0;
+}
+.tab-btn .tab-score {
+  background: rgba(79,142,247,0.2);
+  color: var(--blue-light);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+.tab-btn.active .tab-score {
+  background: var(--blue-accent);
+  color: white;
+}
+.tab-btn .soon {
+  font-size: 9px; opacity: 0.5;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px; padding: 1px 5px;
+}
+
+.tab-content { display: none; padding: 24px; }
+.tab-content.active { display: block; }
+
+/* ── AUDIT GROUP ── */
+.audit-group {
+  margin-bottom: 24px;
+}
+.audit-group-header {
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 10px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.audit-group-header h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: white; letter-spacing: 0.5px;
+}
+.group-score-pill {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px; font-weight: 600; color: white;
+}
+
+/* ── AUDIT ITEM ── */
+.audit-item {
+  border: 1.5px solid var(--gray-light);
+  border-top: none;
+  background: white;
+  padding: 16px 18px;
+  transition: background 0.15s;
+}
+.audit-item:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.audit-item:hover { background: var(--off-white); }
+
+.audit-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.audit-item-left { flex: 1; }
+.audit-item-num {
+  font-size: 10px; font-weight: 700;
+  color: var(--blue-accent);
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+.audit-item-title {
+  font-size: 13.5px; font-weight: 600;
+  color: var(--navy);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.audit-item-iso { margin-bottom: 4px; }
+.audit-item-right {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── SKOR CONTROL ── */
+.score-control {
+  display: flex; align-items: center; gap: 4px;
+}
+.score-dots {
+  display: flex; gap: 4px;
+}
+.score-dot {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  border: 2px solid var(--gray-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  color: var(--gray-text);
+  transition: all 0.15s;
+  background: white;
+}
+.score-dot:hover { border-color: var(--blue-accent); color: var(--blue-accent); }
+.score-dot.active-1 { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+.score-dot.active-2 { background: #fff7ed; border-color: #f97316; color: #f97316; }
+.score-dot.active-3 { background: #fefce8; border-color: #eab308; color: #ca8a04; }
+.score-dot.active-4 { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
+.score-dot.active-5 { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+
+/* ── YA/TIDAK ── */
+.yn-control { display: flex; gap: 4px; }
+.yn-btn {
+  padding: 5px 12px;
+  border-radius: 5px;
+  border: 1.5px solid var(--gray-light);
+  background: white;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--gray-text);
+}
+.yn-btn:hover { border-color: var(--blue-accent); color: var(--blue-accent); }
+.yn-btn.active-ya { background: var(--green-light); border-color: var(--green); color: #16a34a; }
+.yn-btn.active-tidak { background: var(--red-light); border-color: var(--red); color: #dc2626; }
+
+/* ── CATATAN INPUT ── */
+.audit-item-note {
+  margin-top: 8px;
+}
+.audit-item-note input {
+  width: 100%;
+  border: 1.5px solid var(--gray-light);
+  border-radius: 5px;
+  padding: 7px 11px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 12.5px; color: var(--navy);
+  background: var(--off-white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.audit-item-note input:focus {
+  border-color: var(--blue-accent);
+  background: white;
+}
+
+/* ── KETERANGAN EXPAND ── */
+.keterangan-toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--blue-accent);
+  cursor: pointer; margin-top: 4px;
+  padding: 3px 0;
+  background: none; border: none;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  transition: color 0.2s;
+  user-select: none;
+}
+.keterangan-toggle:hover { color: var(--navy); }
+.keterangan-toggle .arrow { transition: transform 0.2s; font-size: 10px; }
+.keterangan-toggle.open .arrow { transform: rotate(180deg); }
+
+.keterangan-panel {
+  display: none;
+  margin-top: 8px;
+  background: var(--off-white);
+  border: 1px solid var(--gray-light);
+  border-radius: 6px;
+  padding: 12px;
+  overflow: hidden;
+}
+.keterangan-panel.open { display: block; }
+.keterangan-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.keterangan-panel table th {
+  background: var(--navy);
+  color: white;
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+}
+.keterangan-panel table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--gray-light);
+  vertical-align: top;
+  line-height: 1.4;
+}
+.keterangan-panel table tr:last-child td { border-bottom: none; }
+.keterangan-panel table tr:nth-child(even) td { background: white; }
+.skor-label {
+  font-weight: 700; white-space: nowrap;
+}
+.skor-1 { color: #ef4444; }
+.skor-2 { color: #f97316; }
+.skor-3 { color: #ca8a04; }
+.skor-4 { color: #16a34a; }
+.skor-5 { color: #2563eb; }
+
+/* ── INSIDEN BLOCK ── */
+.insiden-block {
+  border: 2px solid #fee2e2;
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  overflow: hidden;
+}
+.insiden-header {
+  background: #fef2f2;
+  padding: 8px 14px;
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: #dc2626; letter-spacing: 0.3px;
+}
+.insiden-body { padding: 14px; }
+
+/* ── TEMUAN SECTION ── */
+.temuan-section { margin-top: 6px; }
+.temuan-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.temuan-header h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--navy); display: flex; align-items: center; gap: 7px;
+}
+.add-temuan-btn {
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600; font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.2s;
+}
+.add-temuan-btn:hover { background: var(--navy-mid); }
+
+.temuan-card {
+  border: 1.5px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.temuan-card-header {
+  background: var(--off-white);
+  padding: 8px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--gray-light);
+}
+.temuan-card-header span {
+  font-size: 12px; font-weight: 600; color: var(--gray-text);
+}
+.remove-temuan-btn {
+  background: none; border: none;
+  color: #ef4444; cursor: pointer; font-size: 14px;
+  padding: 2px 6px; border-radius: 4px;
+  transition: background 0.15s;
+}
+.remove-temuan-btn:hover { background: var(--red-light); }
+.temuan-card-body { padding: 14px; display: grid; gap: 12px; }
+.temuan-grid-2 { grid-template-columns: 1fr 1fr; gap: 12px; display: grid; }
+
+/* ── FOTO UPLOAD ── */
+.foto-upload-area {
+  border: 2px dashed var(--gray-mid);
+  border-radius: 6px;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--off-white);
+}
+.foto-upload-area:hover { border-color: var(--blue-accent); background: var(--blue-pale); }
+.foto-upload-area p { font-size: 12px; color: var(--gray-text); }
+.foto-upload-area span { font-size: 22px; display: block; margin-bottom: 4px; }
+.foto-preview {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+}
+.foto-preview img {
+  width: 70px; height: 70px;
+  object-fit: cover; border-radius: 5px;
+  border: 1.5px solid var(--gray-light);
+}
+
+/* ── SCORE SUMMARY ── */
+.score-summary-bar {
+  background: var(--navy);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.summary-item { text-align: center; }
+.summary-item .val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 800; color: white;
+  line-height: 1;
+}
+.summary-item .lbl {
+  font-size: 10px; color: var(--blue-light);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+.summary-divider {
+  width: 1px; height: 36px;
+  background: rgba(255,255,255,0.15);
+}
+.summary-grade {
+  background: var(--blue-accent);
+  border-radius: 8px;
+  padding: 8px 18px;
+  text-align: center;
+}
+.summary-grade .grade {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 800; color: white; line-height: 1;
+}
+.summary-grade .grade-lbl { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap { margin-top: 8px; }
+.progress-bg {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--blue-accent), var(--blue-light));
+  transition: width 0.4s ease;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy-dark);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s;
+  display: flex; align-items: center; gap: 8px;
+  max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left: 4px solid var(--green); }
+.toast.error { border-left: 4px solid var(--red); }
+.toast.info { border-left: 4px solid var(--blue-accent); }
+
+/* ── STATUS BADGE AUTO ── */
+.status-select-wrap { position: relative; }
+
+/* ── DIVIDER ── */
+.section-divider {
+  height: 1px;
+  background: var(--gray-light);
+  margin: 20px 0;
+}
+
+/* ── KELENGKAPAN ADMIN ── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.admin-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--gray-light);
+  font-size: 12.5px;
+}
+.admin-item input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--blue-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── KPI ROW ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.kpi-item {
+  background: var(--off-white);
+  border: 1px solid var(--gray-light);
+  border-radius: 7px;
+  padding: 10px 12px;
+}
+.kpi-item label {
+  font-size: 10px; color: var(--gray-text);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  font-weight: 600; display: block; margin-bottom: 5px;
+}
+.kpi-item .kpi-val {
+  display: flex; align-items: center; gap: 6px;
+}
+.kpi-item input {
+  flex: 1; min-width: 0;
+  border: 1px solid var(--gray-light);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px; color: var(--navy);
+  background: white;
+  outline: none;
+}
+.kpi-item .unit {
+  font-size: 11px; color: var(--gray-text); flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .top-header { padding: 14px 16px; }
+  .container { padding: 16px 12px 60px; }
+  .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr 1fr; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .admin-grid { grid-template-columns: repeat(2, 1fr); }
+  .temuan-grid-2 { grid-template-columns: 1fr; }
+  .score-dots { flex-wrap: wrap; }
+  .audit-item-right { flex-direction: column; align-items: flex-end; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="top-header">
+  <div class="brand">
+    <a href="index.html" class="back-btn" title="Kembali ke Dashboard">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+    <div class="brand-icon">dbp</div>
+    <div class="brand-text">
+      <a href="index.html" style="text-decoration:none;">
+        <h1 style="cursor:pointer;">Enterprise Audit Command Center</h1>
+      </a>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="db-status" style="display:none;">
+      <div class="db-dot" id="dbDot"></div>
+      <span id="dbStatusText">Menghubungkan…</span>
+    </div>
+    <button class="save-btn" onclick="saveAudit()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Submit Assessment
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── HEADER FORM ── -->
+  <div class="card" id="headerForm">
+    <div class="card-header">
+      <h2><span class="icon">📋</span> Checklist Detail</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-4" style="margin-bottom:14px;">
+        <div class="form-group">
+          <label>Contractor / Vendor</label>
+          <input type="text" id="kontraktor" placeholder="PT. ..." />
+        </div>
+        <div class="form-group">
+          <label>Lokasi / Pit</label>
+          <input type="text" id="lokasi" placeholder="Pit A, Pit B..." />
+        </div>
+        <div class="form-group">
+          <label>Shift</label>
+          <select id="shift">
+            <option value="">Pilih Shift</option>
+            <option>Shift 1 (07.00–19.00)</option>
+            <option>Shift 2 (19.00–07.00)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tanggal &amp; Jam</label>
+          <input type="datetime-local" id="tanggalJam" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTRACTOR MONITORING ── -->
+  <div class="card">
+    <div class="card-header">
+      <h2><span class="icon">🏢</span> Contractor Monitoring</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-4" style="margin-bottom:14px;">
+        <div class="form-group">
+          <label>Contract Reference</label>
+          <input type="text" id="noKontrak" placeholder="HRM/..." />
+        </div>
+        <div class="form-group">
+          <label>Berlaku Sampai</label>
+          <input type="date" id="berlakuSampai" />
+        </div>
+        <div class="form-group">
+          <label>Compliance Status</label>
+          <select id="statusIzin" onchange="updateStatusBadge()">
+            <option value="">Pilih Status</option>
+            <option value="aktif">Aktif &amp; Lengkap</option>
+            <option value="akan_expired">Akan Expired (&lt;30 hari)</option>
+            <option value="expired">Expired / Bermasalah</option>
+            <option value="proses">Dalam Proses</option>
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end;">
+          <label>System Evaluation</label>
+          <div id="statusBadgeWrap" style="padding-top:4px;">
+            <span class="badge badge-gray" id="statusBadge">— Belum Dipilih</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-row" style="margin-bottom:14px;">
+        <div class="kpi-item">
+          <label>Production Performance</label>
+          <div class="kpi-val">
+            <input type="number" id="kpiProduksi" placeholder="0" min="0" max="200">
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-item">
+          <label>Safety Performance</label>
+          <div class="kpi-val">
+            <input type="number" id="kpiSafety" placeholder="0" min="0" max="100">
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-item">
+          <label>Monthly Penalties</label>
+          <div class="kpi-val">
+            <input type="number" id="penalty" placeholder="0" min="0">
+            <span class="unit">kali</span>
+          </div>
+        </div>
+        <div class="kpi-item">
+          <label>PIC / Supervisor</label>
+          <div class="kpi-val">
+            <input type="text" id="pic" placeholder="Nama PIC" style="padding:5px 8px;font-size:12px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Remarks</label>
+        <textarea id="catatanUmum" placeholder="Catatan kondisi umum, isu terkini, dll..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCORE SUMMARY BAR ── -->
+  <div class="score-summary-bar" id="scoreSummary">
+    <div class="summary-item">
+      <div class="val" id="summaryTotal">0</div>
+      <div class="lbl">Total Skor</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <div class="val" id="summaryMax">0</div>
+      <div class="lbl">Maks. Skor</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <div class="val" id="summaryPct">0%</div>
+      <div class="lbl">Persentase</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:var(--blue-light);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px;">Progress Pengisian</div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="fillBar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="summary-grade">
+      <div class="grade" id="summaryGrade">—</div>
+      <div class="grade-lbl">Grade</div>
+    </div>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs-wrapper">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('coalGetting',this)">
+        ⛏ Coal Getting
+        <span class="tab-score" id="scoreCoalGetting">0/65</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('hauling',this)" disabled style="opacity:0.45;cursor:not-allowed;">
+        🚛 Hauling <span class="soon">SESI 2</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('roadMaint',this)" disabled style="opacity:0.45;cursor:not-allowed;">
+        🛣 Road Maintenance <span class="soon">SESI 3</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('crushing',this)" disabled style="opacity:0.45;cursor:not-allowed;">
+        🏭 Crushing <span class="soon">SESI 4</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('barging',this)" disabled style="opacity:0.45;cursor:not-allowed;">
+        ⚓ Barging <span class="soon">SESI 5</span>
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TAB: COAL GETTING                         -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="tab-content active" id="tab-coalGetting">
+
+      <!-- GROUP 1: Kinerja Alat Gali -->
+      <div class="audit-group" id="group-kinerja">
+        <div class="audit-group-header">
+          <h3>⚙️ Grup 1 — Kinerja Alat Gali</h3>
+          <span class="group-score-pill" id="gscore-kinerja">0 / 25</span>
+        </div>
+        <!-- Item 1.1 -->
+        <div class="audit-item" id="item-cg1">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-01</div>
+              <div class="audit-item-title">Pencapaian target produksi alat gali (BCM/jam vs rencana)</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">
+                📖 Keterangan Skor <span class="arrow">▼</span>
+              </button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1 — Sangat Buruk</span></td><td>Produksi &lt;60% target, alat sering breakdown tidak terencana, tidak ada laporan</td></tr>
+                  <tr><td><span class="skor-label skor-2">2 — Kurang</span></td><td>Produksi 60–75% target, beberapa alat breakdown, laporan tidak lengkap</td></tr>
+                  <tr><td><span class="skor-label skor-3">3 — Cukup</span></td><td>Produksi 75–90% target, satu alat breakdown, laporan cukup memadai</td></tr>
+                  <tr><td><span class="skor-label skor-4">4 — Baik</span></td><td>Produksi 90–99% target, alat beroperasi baik, laporan lengkap</td></tr>
+                  <tr><td><span class="skor-label skor-5">5 — Sangat Baik</span></td><td>Produksi ≥100% target, semua alat MA ≥85%, laporan real-time akurat</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-control">
+                <div class="score-dots" id="sd-cg1">
+                  <div class="score-dot" onclick="setScore('cg1',1,this)" title="1">1</div>
+                  <div class="score-dot" onclick="setScore('cg1',2,this)" title="2">2</div>
+                  <div class="score-dot" onclick="setScore('cg1',3,this)" title="3">3</div>
+                  <div class="score-dot" onclick="setScore('cg1',4,this)" title="4">4</div>
+                  <div class="score-dot" onclick="setScore('cg1',5,this)" title="5">5</div>
+                </div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg1','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg1','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note">
+            <input type="text" id="note-cg1" placeholder="Catatan temuan (opsional)…" oninput="updateSummary()">
+          </div>
+        </div>
+
+        <!-- Item 1.2 -->
+        <div class="audit-item" id="item-cg2">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-02</div>
+              <div class="audit-item-title">Mechanical Availability (MA) & Physical Availability (PA) alat gali</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-14001">ISO 14001</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">
+                📖 Keterangan Skor <span class="arrow">▼</span>
+              </button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>MA &lt;60%, banyak breakdown tidak terjadwal, tidak ada preventive maintenance</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>MA 60–70%, PM tidak konsisten, sering delay perbaikan</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>MA 70–80%, PM dilakukan tapi tidak selalu tepat waktu</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>MA 80–85%, PM terjadwal dengan baik, record tersedia</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>MA ≥85%, PM proaktif, HM record lengkap, tidak ada breakdown kritis</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-control">
+                <div class="score-dots" id="sd-cg2">
+                  <div class="score-dot" onclick="setScore('cg2',1,this)">1</div>
+                  <div class="score-dot" onclick="setScore('cg2',2,this)">2</div>
+                  <div class="score-dot" onclick="setScore('cg2',3,this)">3</div>
+                  <div class="score-dot" onclick="setScore('cg2',4,this)">4</div>
+                  <div class="score-dot" onclick="setScore('cg2',5,this)">5</div>
+                </div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg2','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg2','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note">
+            <input type="text" id="note-cg2" placeholder="Catatan temuan…" oninput="updateSummary()">
+          </div>
+        </div>
+
+        <!-- Item 1.3 -->
+        <div class="audit-item" id="item-cg3">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-03</div>
+              <div class="audit-item-title">Jumlah alat beroperasi vs rencana (fleet aktif)</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">
+                📖 Keterangan Skor <span class="arrow">▼</span>
+              </button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>&lt;50% armada aktif beroperasi dari yang direncanakan</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>50–70% armada aktif</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>70–85% armada aktif, ada penggantian unit sementara</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>85–99% armada aktif sesuai rencana</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>100% armada aktif, ada cadangan siap pakai</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-control">
+                <div class="score-dots" id="sd-cg3">
+                  <div class="score-dot" onclick="setScore('cg3',1,this)">1</div>
+                  <div class="score-dot" onclick="setScore('cg3',2,this)">2</div>
+                  <div class="score-dot" onclick="setScore('cg3',3,this)">3</div>
+                  <div class="score-dot" onclick="setScore('cg3',4,this)">4</div>
+                  <div class="score-dot" onclick="setScore('cg3',5,this)">5</div>
+                </div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg3','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg3','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note">
+            <input type="text" id="note-cg3" placeholder="Catatan temuan…" oninput="updateSummary()">
+          </div>
+        </div>
+
+        <!-- Item 1.4 -->
+        <div class="audit-item" id="item-cg4">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-04</div>
+              <div class="audit-item-title">Pre-shift inspection (P2H) alat gali terdokumentasi</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-45001">ISO 45001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">
+                📖 Keterangan Skor <span class="arrow">▼</span>
+              </button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada P2H dilakukan, operator langsung start alat</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>P2H dilakukan tapi tidak terdokumentasi atau sangat tidak lengkap</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>P2H dilakukan dan dicatat, tapi ada item yang terlewat</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>P2H lengkap dan terdokumentasi dengan baik, defect dilaporkan</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>P2H 100% lengkap, defect ditindaklanjuti, review supervisor ada</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-control">
+                <div class="score-dots" id="sd-cg4">
+                  <div class="score-dot" onclick="setScore('cg4',1,this)">1</div>
+                  <div class="score-dot" onclick="setScore('cg4',2,this)">2</div>
+                  <div class="score-dot" onclick="setScore('cg4',3,this)">3</div>
+                  <div class="score-dot" onclick="setScore('cg4',4,this)">4</div>
+                  <div class="score-dot" onclick="setScore('cg4',5,this)">5</div>
+                </div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg4','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg4','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note">
+            <input type="text" id="note-cg4" placeholder="Catatan temuan…" oninput="updateSummary()">
+          </div>
+        </div>
+
+        <!-- Item 1.5 -->
+        <div class="audit-item" id="item-cg5">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-05</div>
+              <div class="audit-item-title">Efisiensi kerja operator (idle time vs operating time)</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">
+                📖 Keterangan Skor <span class="arrow">▼</span>
+              </button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Idle time &gt;40%, operator tidak produktif, sering menunggu tanpa alasan jelas</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Idle time 30–40%, ada masalah antrian atau komunikasi</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Idle time 20–30%, ada upaya monitoring tapi belum optimal</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Idle time 10–20%, operator dipantau, dispatch mulai efektif</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Idle time &lt;10%, dispatch system optimal, operator produktif</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-control">
+                <div class="score-dots" id="sd-cg5">
+                  <div class="score-dot" onclick="setScore('cg5',1,this)">1</div>
+                  <div class="score-dot" onclick="setScore('cg5',2,this)">2</div>
+                  <div class="score-dot" onclick="setScore('cg5',3,this)">3</div>
+                  <div class="score-dot" onclick="setScore('cg5',4,this)">4</div>
+                  <div class="score-dot" onclick="setScore('cg5',5,this)">5</div>
+                </div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg5','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg5','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note">
+            <input type="text" id="note-cg5" placeholder="Catatan temuan…" oninput="updateSummary()">
+          </div>
+        </div>
+      </div><!-- end group 1 -->
+
+      <!-- GROUP 2: Proses Loading & Kualitas -->
+      <div class="audit-group" id="group-loading">
+        <div class="audit-group-header">
+          <h3>📦 Grup 2 — Proses Loading &amp; Kualitas</h3>
+          <span class="group-score-pill" id="gscore-loading">0 / 25</span>
+        </div>
+
+        <!-- Item 2.1 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-06</div>
+              <div class="audit-item-title">Prosedur seleksi batubara (pemisahan coal vs OB) dijalankan</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-14001">ISO 14001</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada prosedur, mixing coal-OB terjadi, tidak ada surveyor di lapangan</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Prosedur ada tapi jarang dijalankan, mixing sesekali terjadi</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Prosedur dijalankan sebagian besar waktu, ada supervisor di pit</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Prosedur konsisten, sampling dilakukan, record tersedia</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Prosedur 100% diterapkan, surveyor aktif, tidak ada mixing, laporan kualitas harian lengkap</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg6">
+                <div class="score-dot" onclick="setScore('cg6',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg6',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg6',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg6',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg6',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg6','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg6','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg6" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 2.2 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-07</div>
+              <div class="audit-item-title">Akurasi tonnase loading (survey aktual vs target/shift)</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada pencatatan tonnase, tidak ada rekonsiliasi</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Pencatatan ada tapi akurasi rendah (&gt;15% deviasi dari target)</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Deviasi 8–15%, ada upaya koreksi tapi lambat</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Deviasi 3–8%, rekonsiliasi dilakukan setiap shift</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Deviasi &lt;3%, rekonsiliasi real-time, laporan akurat</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg7">
+                <div class="score-dot" onclick="setScore('cg7',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg7',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg7',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg7',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg7',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg7','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg7','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg7" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 2.3 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-08</div>
+              <div class="audit-item-title">Kondisi front kerja (bench, slope, drainage) sesuai mine plan</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-45001">ISO 45001</span>
+                <span class="iso-badge iso-14001">ISO 14001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Front kerja tidak sesuai mine plan, slope curam berbahaya, tidak ada drainage</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Beberapa deviasi dari mine plan, drainage buruk, risiko longsor ada</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Sebagian sesuai mine plan, ada drainage dasar, slope dalam toleransi</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Sesuai mine plan, drainage baik, slope aman, ada survey rutin</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Sesuai mine plan 100%, drainage excellent, slope monitoring aktif, dokumentasi lengkap</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg8">
+                <div class="score-dot" onclick="setScore('cg8',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg8',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg8',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg8',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg8',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg8','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg8','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg8" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 2.4 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-09</div>
+              <div class="audit-item-title">Pengelolaan dewatering pit (pompa, saluran air, sump)</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-14001">ISO 14001</span>
+                <span class="iso-badge iso-45001">ISO 45001</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada sistem dewatering, air menggenang di pit, operasi terganggu</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Pompa ada tapi kapasitas kurang, sump tidak terawat</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Dewatering cukup memadai, genangan kecil terjadi saat hujan</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Dewatering baik, kapasitas cukup, saluran berfungsi baik</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Sistem dewatering excellent, pit bebas genangan, monitoring otomatis, record lengkap</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg9">
+                <div class="score-dot" onclick="setScore('cg9',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg9',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg9',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg9',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg9',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg9','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg9','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg9" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 2.5 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-10</div>
+              <div class="audit-item-title">Pelaporan produksi harian (DPR) akurat dan tepat waktu</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-9001">ISO 9001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada DPR, atau DPR sangat terlambat (&gt;24 jam), data tidak akurat</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>DPR ada tapi sering terlambat, data banyak yang salah</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>DPR tepat waktu 70% kasus, akurasi cukup</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>DPR tepat waktu, data akurat, format standar digunakan</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>DPR real-time atau &lt;2 jam setelah shift, data terverifikasi, diupload ke sistem</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg10">
+                <div class="score-dot" onclick="setScore('cg10',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg10',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg10',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg10',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg10',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg10','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg10','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg10" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+      </div><!-- end group 2 -->
+
+      <!-- GROUP 3: Safety & Compliance + INSIDEN -->
+      <div class="audit-group" id="group-safety">
+        <div class="audit-group-header">
+          <h3>🦺 Grup 3 — Safety &amp; Compliance</h3>
+          <span class="group-score-pill" id="gscore-safety">0 / 15</span>
+        </div>
+
+        <!-- Item 3.1 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-11</div>
+              <div class="audit-item-title">Pemakaian APD lengkap oleh seluruh personil di area pit</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-45001">ISO 45001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>&lt;60% personil memakai APD lengkap, tidak ada enforcement</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>60–75% memakai APD, ada yang tidak pakai helm/rompi</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>75–90% memakai APD, supervisor mulai menegakkan aturan</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>90–99% APD lengkap, pelanggar ditegur dan dicatat</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>100% APD lengkap, inspeksi rutin, zero tolerance diterapkan</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg11">
+                <div class="score-dot" onclick="setScore('cg11',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg11',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg11',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg11',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg11',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg11','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg11','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg11" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 3.2 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-12</div>
+              <div class="audit-item-title">Pelaksanaan safety talk / toolbox meeting sebelum shift</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-45001">ISO 45001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada safety talk, langsung mulai kerja tanpa briefing</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Safety talk sesekali dilakukan, tidak terdokumentasi</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Safety talk dilakukan &gt;80% hari kerja, ada absensi</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Safety talk rutin setiap shift, terdokumentasi, topik relevan</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>Safety talk 100%, materi sesuai hazard harian, diarsipkan, dikonfirmasi supervisor</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg12">
+                <div class="score-dot" onclick="setScore('cg12',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg12',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg12',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg12',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg12',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg12','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg12','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg12" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- Item 3.3 -->
+        <div class="audit-item">
+          <div class="audit-item-top">
+            <div class="audit-item-left">
+              <div class="audit-item-num">CG-13</div>
+              <div class="audit-item-title">Kepatuhan terhadap batas kecepatan dan traffic management di pit</div>
+              <div class="audit-item-iso">
+                <span class="iso-badge iso-45001">ISO 45001</span>
+                <span class="iso-badge iso-smkp">SMKP</span>
+                <span class="iso-badge iso-14001">ISO 14001</span>
+              </div>
+              <button class="keterangan-toggle" onclick="toggleKet(this)">📖 Keterangan Skor <span class="arrow">▼</span></button>
+              <div class="keterangan-panel">
+                <table>
+                  <tr><th>Skor</th><th>Kondisi</th></tr>
+                  <tr><td><span class="skor-label skor-1">1</span></td><td>Tidak ada traffic management, kecepatan tidak terkontrol, hampir tabrakan terjadi</td></tr>
+                  <tr><td><span class="skor-label skor-2">2</span></td><td>Ada rambu tapi sering dilanggar, tidak ada enforcement</td></tr>
+                  <tr><td><span class="skor-label skor-3">3</span></td><td>Kepatuhan 70–80%, traffic man di titik kritis, pelanggaran dicatat</td></tr>
+                  <tr><td><span class="skor-label skor-4">4</span></td><td>Kepatuhan 90%+, traffic management aktif, violator ditindak</td></tr>
+                  <tr><td><span class="skor-label skor-5">5</span></td><td>100% kepatuhan, speed monitoring aktif (GPS/CCTV), zero near miss</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="audit-item-right">
+              <div class="score-dots" id="sd-cg13">
+                <div class="score-dot" onclick="setScore('cg13',1,this)">1</div>
+                <div class="score-dot" onclick="setScore('cg13',2,this)">2</div>
+                <div class="score-dot" onclick="setScore('cg13',3,this)">3</div>
+                <div class="score-dot" onclick="setScore('cg13',4,this)">4</div>
+                <div class="score-dot" onclick="setScore('cg13',5,this)">5</div>
+              </div>
+              <div class="yn-control">
+                <button class="yn-btn" onclick="setYN('cg13','ya',this)">Ya</button>
+                <button class="yn-btn" onclick="setYN('cg13','tidak',this)">Tidak</button>
+              </div>
+            </div>
+          </div>
+          <div class="audit-item-note"><input type="text" id="note-cg13" placeholder="Catatan temuan…" oninput="updateSummary()"></div>
+        </div>
+
+        <!-- INSIDEN BLOCK -->
+        <div class="insiden-block" style="margin:12px 0 4px;">
+          <div class="insiden-header">⚠️ INSIDEN — Coal Getting (isi jika ada insiden shift ini)</div>
+          <div class="insiden-body">
+            <div class="form-grid form-grid-4" style="margin-bottom:12px;">
+              <div class="form-group">
+                <label>Jumlah Near Miss</label>
+                <input type="number" id="insiden_nm_cg" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>Jumlah FAC</label>
+                <input type="number" id="insiden_fac_cg" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>Jumlah LTI</label>
+                <input type="number" id="insiden_lti_cg" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>Property Damage</label>
+                <select id="insiden_pd_cg">
+                  <option value="tidak">Tidak Ada</option>
+                  <option value="ada">Ada</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label>Deskripsi Singkat Insiden</label>
+                <textarea id="insiden_desc_cg" placeholder="Kronologi singkat insiden..." style="min-height:60px;"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Tindakan Darurat yang Diambil</label>
+                <textarea id="insiden_action_cg" placeholder="Tindakan pertama yang diambil..." style="min-height:60px;"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end group 3 -->
+
+      <!-- SECTION TEMUAN -->
+      <div class="card temuan-section" style="margin-top:20px;">
+        <div class="card-header">
+          <h2><span class="icon">🔍</span> Temuan &amp; Rekomendasi — Coal Getting</h2>
+        </div>
+        <div class="card-body">
+          <div class="temuan-header">
+            <h3>📌 Daftar Temuan</h3>
+            <button class="add-temuan-btn" onclick="addTemuan('cg')">+ Tambah Temuan</button>
+          </div>
+          <div id="temuan-list-cg">
+            <!-- temuan items injected here -->
+          </div>
+          <div id="temuan-empty-cg" style="text-align:center;padding:30px;color:var(--gray-text);font-size:13px;">
+            <div style="font-size:28px;margin-bottom:8px;">📋</div>
+            Belum ada temuan. Klik "+ Tambah Temuan" untuk menambahkan.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end tab-coalGetting -->
+  </div><!-- end tabs-wrapper -->
+
+</div><!-- end container -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// SUPABASE INIT — key sama dengan index.html
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://nvdxfsuddbkoubsdyikc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZHhmc3VkZGJrb3Vic2R5aWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NjMyNzEsImV4cCI6MjA5MzUzOTI3MX0.1b_y3QOuqJ4lqNJmGm0wECxPxRvSx2665U_eHMTbpIM';
+
+let supabaseClient = null;
+
+async function initSupabase() {
+  try {
+    const { createClient } = supabase;
+    supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Cek auth session — redirect ke index jika belum login
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      showToast('info', '🔐 Sesi habis, diarahkan ke login...');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      return;
+    }
+    // Test connection
+    const { error } = await supabaseClient.from('hrm_audits').select('id').limit(1);
+    if (error && error.code !== 'PGRST116') throw error;
+    setDbStatus('connected', 'Terhubung · ' + (session.user?.email?.split('@')[0] || 'User'));
+  } catch (e) {
+    console.error('Supabase error:', e);
+    setDbStatus('error', 'Koneksi gagal');
+  }
+}
+
+function setDbStatus(state, text) {
+  const dot = document.getElementById('dbDot');
+  const txt = document.getElementById('dbStatusText');
+  dot.className = 'db-dot ' + (state === 'connected' ? 'connected' : state === 'error' ? 'error' : '');
+  txt.textContent = text;
+}
+
+// ═══════════════════════════════════════
+// SCORE STATE
+// ═══════════════════════════════════════
+const scores = {};
+const yn = {};
+
+// Coal Getting items grouped
+const CG_ITEMS = {
+  'kinerja': ['cg1','cg2','cg3','cg4','cg5'],
+  'loading':  ['cg6','cg7','cg8','cg9','cg10'],
+  'safety':   ['cg11','cg12','cg13']
+};
+const CG_ALL = [...CG_ITEMS.kinerja, ...CG_ITEMS.loading, ...CG_ITEMS.safety];
+const CG_MAX = CG_ALL.length * 5; // 65
+
+function setScore(itemId, val, dotEl) {
+  scores[itemId] = val;
+  // Update UI
+  const container = document.getElementById('sd-' + itemId);
+  if (!container) return;
+  container.querySelectorAll('.score-dot').forEach((d, i) => {
+    d.className = 'score-dot';
+    if (i + 1 <= val) d.classList.add('active-' + (i + 1));
+  });
+  updateSummary();
+}
+
+function setYN(itemId, val, btnEl) {
+  yn[itemId] = val;
+  const parent = btnEl.parentElement;
+  parent.querySelectorAll('.yn-btn').forEach(b => {
+    b.className = 'yn-btn';
+  });
+  btnEl.classList.add('active-' + val);
+}
+
+function updateSummary() {
+  let total = 0;
+  let filled = 0;
+
+  // Group scores
+  let kg = 0, lg = 0, sg = 0;
+  CG_ITEMS.kinerja.forEach(id => { const s = scores[id] || 0; kg += s; if (s > 0) filled++; });
+  CG_ITEMS.loading.forEach(id => { const s = scores[id] || 0; lg += s; if (s > 0) filled++; });
+  CG_ITEMS.safety.forEach(id => { const s = scores[id] || 0; sg += s; if (s > 0) filled++; });
+  total = kg + lg + sg;
+
+  document.getElementById('gscore-kinerja').textContent = kg + ' / 25';
+  document.getElementById('gscore-loading').textContent = lg + ' / 25';
+  document.getElementById('gscore-safety').textContent = sg + ' / 15';
+  document.getElementById('scoreCoalGetting').textContent = total + '/' + CG_MAX;
+  document.getElementById('summaryTotal').textContent = total;
+  document.getElementById('summaryMax').textContent = CG_MAX;
+
+  const pct = CG_MAX > 0 ? Math.round((total / CG_MAX) * 100) : 0;
+  document.getElementById('summaryPct').textContent = pct + '%';
+  document.getElementById('fillBar').style.width = (filled / CG_ALL.length * 100) + '%';
+
+  // Grade
+  let grade = '—';
+  if (pct >= 90) grade = 'A';
+  else if (pct >= 80) grade = 'B';
+  else if (pct >= 70) grade = 'C';
+  else if (pct >= 60) grade = 'D';
+  else if (pct > 0) grade = 'E';
+  document.getElementById('summaryGrade').textContent = grade;
+}
+
+// ═══════════════════════════════════════
+// STATUS BADGE
+// ═══════════════════════════════════════
+function updateStatusBadge() {
+  const val = document.getElementById('statusIzin').value;
+  const badge = document.getElementById('statusBadge');
+  const map = {
+    'aktif':       ['badge-green',  '✅ Aktif & Lengkap'],
+    'akan_expired':['badge-yellow', '⚠️ Akan Expired'],
+    'expired':     ['badge-red',    '❌ Expired / Bermasalah'],
+    'proses':      ['badge-blue',   '🔄 Dalam Proses'],
+  };
+  badge.className = 'badge ' + (map[val] ? map[val][0] : 'badge-gray');
+  badge.textContent = map[val] ? map[val][1] : '— Belum Dipilih';
+}
+
+// ═══════════════════════════════════════
+// KETERANGAN TOGGLE
+// ═══════════════════════════════════════
+function toggleKet(btn) {
+  const panel = btn.nextElementSibling;
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const tc = document.getElementById('tab-' + name);
+  if (tc) tc.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// TEMUAN
+// ═══════════════════════════════════════
+let temuanCount = { cg: 0 };
+
+function addTemuan(tab) {
+  temuanCount[tab]++;
+  const n = temuanCount[tab];
+  const list = document.getElementById('temuan-list-' + tab);
+  const empty = document.getElementById('temuan-empty-' + tab);
+  if (empty) empty.style.display = 'none';
+
+  const el = document.createElement('div');
+  el.className = 'temuan-card';
+  el.id = 'temuan-' + tab + '-' + n;
+  el.innerHTML = `
+    <div class="temuan-card-header">
+      <span>Temuan #${n}</span>
+      <button class="remove-temuan-btn" onclick="removeTemuan('${tab}',${n})" title="Hapus temuan">✕</button>
+    </div>
+    <div class="temuan-card-body">
+      <div class="form-group">
+        <label>Temuan Utama</label>
+        <textarea id="tfinding-${tab}-${n}" placeholder="Deskripsi temuan..." style="min-height:64px;"></textarea>
+      </div>
+      <div class="temuan-grid-2">
+        <div class="form-group">
+          <label>Severity</label>
+          <select id="tsev-${tab}-${n}">
+            <option value="">Pilih Severity</option>
+            <option value="low">🟢 Low</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="high">🔴 High</option>
+            <option value="critical">🚨 Critical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="tdue-${tab}-${n}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Rekomendasi</label>
+        <textarea id="trec-${tab}-${n}" placeholder="Tindakan perbaikan yang disarankan..." style="min-height:56px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Upload Foto Bukti</label>
+        <div class="foto-upload-area" onclick="document.getElementById('fphoto-${tab}-${n}').click()">
+          <span>📷</span>
+          <p>Klik untuk upload foto</p>
+        </div>
+        <input type="file" id="fphoto-${tab}-${n}" accept="image/*" multiple style="display:none" onchange="previewFoto(this,'fpreview-${tab}-${n}')">
+        <div class="foto-preview" id="fpreview-${tab}-${n}"></div>
+      </div>
+    </div>
+  `;
+  list.appendChild(el);
+}
+
+function removeTemuan(tab, n) {
+  const el = document.getElementById('temuan-' + tab + '-' + n);
+  if (el) el.remove();
+  const list = document.getElementById('temuan-list-' + tab);
+  const empty = document.getElementById('temuan-empty-' + tab);
+  if (list && list.children.length === 0 && empty) {
+    empty.style.display = 'block';
+  }
+}
+
+function previewFoto(input, previewId) {
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════════════════════════
+// SAVE TO SUPABASE
+// ═══════════════════════════════════════
+async function saveAudit() {
+  if (!supabaseClient) {
+    showToast('error', '⚠️ Tidak terhubung ke database. Periksa koneksi Supabase.');
+    return;
+  }
+
+  showToast('info', '💾 Menyimpan data audit...');
+
+  const headerData = {
+    kontraktor: document.getElementById('kontraktor').value,
+    lokasi: document.getElementById('lokasi').value,
+    shift: document.getElementById('shift').value,
+    tanggal_jam: document.getElementById('tanggalJam').value,
+    no_kontrak: document.getElementById('noKontrak').value,
+    berlaku_sampai: document.getElementById('berlakuSampai').value,
+    status_izin: document.getElementById('statusIzin').value,
+    kpi_produksi: parseFloat(document.getElementById('kpiProduksi').value) || null,
+    kpi_safety: parseFloat(document.getElementById('kpiSafety').value) || null,
+    penalty: parseInt(document.getElementById('penalty').value) || 0,
+    pic: document.getElementById('pic').value,
+    catatan_umum: document.getElementById('catatanUmum').value,
+    tab_aktif: 'coal_getting',
+    total_skor: parseInt(document.getElementById('summaryTotal').textContent) || 0,
+    created_at: new Date().toISOString()
+  };
+
+  try {
+    const { data: auditRow, error: auditErr } = await supabaseClient
+      .from('hrm_audits')
+      .insert([headerData])
+      .select()
+      .single();
+
+    if (auditErr) throw auditErr;
+    const auditId = auditRow.id;
+
+    // Save audit items
+    const items = [];
+    CG_ALL.forEach(id => {
+      items.push({
+        audit_id: auditId,
+        section: 'coal_getting',
+        item_code: id.toUpperCase().replace('CG', 'CG-'),
+        skor: scores[id] || null,
+        yn: yn[id] || null,
+        catatan: document.getElementById('note-' + id)?.value || null
+      });
+    });
+
+    if (items.length > 0) {
+      const { error: itemErr } = await supabaseClient
+        .from('hrm_audit_items')
+        .insert(items);
+      if (itemErr) throw itemErr;
+    }
+
+    // Save insiden
+    const insidenData = {
+      audit_id: auditId,
+      section: 'coal_getting',
+      near_miss: parseInt(document.getElementById('insiden_nm_cg').value) || 0,
+      fac: parseInt(document.getElementById('insiden_fac_cg').value) || 0,
+      lti: parseInt(document.getElementById('insiden_lti_cg').value) || 0,
+      property_damage: document.getElementById('insiden_pd_cg').value,
+      deskripsi: document.getElementById('insiden_desc_cg').value,
+      tindakan: document.getElementById('insiden_action_cg').value
+    };
+    await supabaseClient.from('hrm_findings').insert([insidenData]);
+
+    showToast('success', '✅ Audit berhasil disimpan! ID: ' + auditId);
+  } catch(e) {
+    console.error(e);
+    showToast('error', '❌ Gagal simpan: ' + (e.message || 'Unknown error'));
+  }
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastTimer = null;
+function showToast(type, msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3500);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Set datetime default
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString().slice(0,16);
+  document.getElementById('tanggalJam').value = local;
+
+  initSupabase();
+  updateSummary();
+});
+</script>
+</body>
+</html>
